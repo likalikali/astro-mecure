@@ -3,8 +3,8 @@ import { getYear } from 'date-fns';
 import { url } from '@/utils/url';
 
 const config: Config = {
-  title: '银河渡舟',
-  description: '浊以静之徐清，安以动之徐生。',
+  title: 'Anriri',
+  description: '大河の一滴。',
   author: 'Wider',
   favicon: url('favicon.ico'),
   navbar: {
@@ -63,15 +63,15 @@ const config: Config = {
   },
   hero: {
     background: import('src/assets/hero-bg.jpg'),
-    description: '欢迎来到银河渡舟的记事簿，看看最近我在折腾啥吧。',
+    description: '欢迎来到Anriri的记事簿，看看最近我在折腾啥吧。',
     title: import('@/custom/HeroLogo.astro'),
   },
   sidebar: {
     widgets: [
       {
         name: 'profile',
-        author: '银河渡舟',
-        description: '浊以静之徐清，安以动之徐生',
+        author: 'Anriri',
+        description: '夜深忽梦少年事，梦啼妆泪红阑干',
         avatar: import('src/assets/avatar.png'),
         background: import('src/assets/profile-bg.jpg'),
         socialIcons: [
@@ -183,7 +183,7 @@ const config: Config = {
       { label: 'Github', url: 'https://github.com/izmttk'},
     ],
     declarations: [
-      `Copyright © ${getYear(new Date())} 银河渡舟 All Rights Reserved.`,
+      `Copyright © ${getYear(new Date())} Anriri All Rights Reserved.`,
     ],
     generator: true,
     rss: true,

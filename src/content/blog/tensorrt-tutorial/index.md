@@ -1,10 +1,13 @@
 ---
+
 title: TensorRT踩坑教程
 date: 2023-07-10
 tags: [PyTorch, TensorRT, CUDA]
 category: [深度学习, 模型部署]
 image: ./cover.jpg
+
 ---
+
 ## 0. 前言
 
 在部署深度学习模型时需要用到TensorRT，看了一遍文档后，我发现对于初学者来说，官方文档实在是太晦涩。文档里既没有接口的应用示例，也没有及时更新新接口的用法。在翻阅了部分博客和TensorRT仓库源码后，才有了本文。
@@ -32,39 +35,41 @@ pip install tensorrt
 Windows下需要使用Zip文件安装，根据 [文档中 Zip File Installation 章节](https://docs.nvidia.com/deeplearning/tensorrt/install-guide/index.html#installing-zip)，下载zip包后：
 
 1. 将压缩包内文件解压后，复制到 `C:\Program Files\NVIDIA GPU Computing Toolkit\TensorRT\v8.x.x.x` 下。安装路径随意选择。
-2. 配置环境变量，将 `<安装路径>/lib` 和 `<安装路径>/bin` 添加到环境变量中。
-3. 安装python包，进入 `<安装路径>/python` 目录，执行如下命令：
 
-    ```bash
-    pip install tensorrt-8.x.x-cp3x-none-win_amd64.whl
-    ```
+2. 配置环境变量，将 `<安装路径>/lib` 和 `<安装路径>/bin` 添加到环境变量中。
+
+3. 安装python包，进入 `<安装路径>/python` 目录，执行如下命令：
+   
+   ```bash
+   pip install tensorrt-8.x.x-cp3x-none-win_amd64.whl
+   ```
 
 ### 1.2 Linux下的安装
 
 Linux下的安装比较简单，根据 [文档中 Tar File Installation 章节](https://docs.nvidia.com/deeplearning/tensorrt/install-guide/index.html#installing-tar)，下载tar包后：
 
 1. 解压tar包，进入解压后的目录。
-
-    ```bash
-    tar -xzvf TensorRT-8.x.x.x.Linux.x86_64-gnu.cuda-1x.x.tar.gz
-    cd TensorRT-8.x.x.x
-    ```
+   
+   ```bash
+   tar -xzvf TensorRT-8.x.x.x.Linux.x86_64-gnu.cuda-1x.x.tar.gz
+   cd TensorRT-8.x.x.x
+   ```
 
 2. 添加环境变量
-
-    ```bash
-    vim ~/.bashrc
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<安装路径>/lib
-    export PATH=$PATH:<安装路径>/bin
-    source ~/.bashrc
-    ```
+   
+   ```bash
+   vim ~/.bashrc
+   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<安装路径>/lib
+   export PATH=$PATH:<安装路径>/bin
+   source ~/.bashrc
+   ```
 
 3. 安装python包
-
-    ```bash
-    cd TensorRT-8.x.x.x/python
-    pip install tensorrt-8.x.x.x-cp3x-none-linux_x86_64.whl
-    ```
+   
+   ```bash
+   cd TensorRT-8.x.x.x/python
+   pip install tensorrt-8.x.x.x-cp3x-none-linux_x86_64.whl
+   ```
 
 ## 2. 推理前的准备
 
@@ -185,8 +190,8 @@ def build_engine(onnx_file_path, precision = 'fp32', dynamic_shapes = None):
     TRT_LOGGER.log(TRT_LOGGER.INFO, 'Completed parsing of ONNX file')
     TRT_LOGGER.log(TRT_LOGGER.INFO, f'Input number: {network.num_inputs}')
     TRT_LOGGER.log(TRT_LOGGER.INFO, f'Output number: {network.num_outputs}')
-    
-    
+
+
     if dynamic_shapes is not None:
         # set optimization profile for dynamic shape
         profile = builder.create_optimization_profile()
@@ -202,7 +207,7 @@ def build_engine(onnx_file_path, precision = 'fp32', dynamic_shapes = None):
     # during inference. Note that this is not required in general, and inference batch size is
     # independent of calibration batch size.
     config.set_memory_pool_limit(trt.MemoryPoolType.WORKSPACE, GiB(1)) # 1G
-    
+
     if precision == 'fp32':
         pass
     elif precision == 'fp16':
@@ -269,11 +274,11 @@ class OutputAllocator(trt.IOutputAllocator):
         # print("[MyOutputAllocator::reallocate_output] TensorName=%s, Memory=%s, Size=%d, Alignment=%d" % (tensor_name, memory, size, alignment))
         if tensor_name in self.buffers:
             del self.buffers[tensor_name]
-        
+
         address = cuda.mem_alloc(size)
         self.buffers[tensor_name] = address
         return int(address)
-        
+
     def notify_shape(self, tensor_name: str, shape: trt.Dims):
         # print("[MyOutputAllocator::notify_shape] TensorName=%s, Shape=%s" % (tensor_name, shape))
         self.shapes[tensor_name] = tuple(shape)
@@ -312,7 +317,7 @@ class ProcessorV3:
         # # 将所选设备设置为当前活动的上下文
         # self.cuda_context = device.make_context()
         # self.cuda_context.push()
-        
+
         self.engine = engine
         self.output_allocator = OutputAllocator()
         # create execution context
@@ -325,13 +330,13 @@ class ProcessorV3:
         # Create a CUDA events
         self.start_event = cuda.Event()
         self.end_event = cuda.Event()
-        
+
     # def __del__(self):
     #     self.cuda_context.pop()
-        
+
     def get_last_inference_time(self):
         return self.start_event.time_till(self.end_event)
-        
+
     def infer(self, inputs: Union[Dict[str, np.ndarray], List[np.ndarray], np.ndarray]) -> OrderedDict[str, np.ndarray]:
         """
         inference process:
@@ -358,7 +363,7 @@ class ProcessorV3:
         for name, arr in zip(self.input_tensor_names, inputs):
             host = cuda.pagelocked_empty(arr.shape, dtype=trt.nptype(self.engine.get_tensor_dtype(name)))
             device = cuda.mem_alloc(arr.nbytes)
-            
+
             host[:] = arr
             cuda.memcpy_htod_async(device, host, self.stream)
             buffers_host.append(host)
@@ -371,7 +376,7 @@ class ProcessorV3:
             self.context.set_tensor_address(name, 0) # set nullptr
             self.context.set_output_allocator(name, self.output_allocator)
         # The do_inference function will return a list of outputs
-        
+
         # Record the start event
         self.start_event.record(self.stream)
         # Run inference.
@@ -380,16 +385,16 @@ class ProcessorV3:
         self.end_event.record(self.stream)
 
         # self.memory.copy_to_host()
-        
+
         output_buffers = OrderedDict()
         for name in self.output_tensor_names:
             arr = cuda.pagelocked_empty(self.output_allocator.shapes[name], dtype=trt.nptype(self.engine.get_tensor_dtype(name)))
             cuda.memcpy_dtoh_async(arr, self.output_allocator.buffers[name], stream=self.stream)
             output_buffers[name] = arr
-        
+
         # Synchronize the stream
         self.stream.synchronize()
-        
+
         return output_buffers
 ```
 
