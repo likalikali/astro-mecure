@@ -71,7 +71,7 @@ const config: Config = {
       {
         name: 'profile',
         author: 'Anriri',
-        description: '夜深忽梦少年事，梦啼妆泪红阑干',
+        description: '大河の一滴。',
         avatar: import('src/assets/avatar.png'),
         background: import('src/assets/profile-bg.jpg'),
         socialIcons: [
@@ -79,31 +79,31 @@ const config: Config = {
             label: 'github',
             color: '#7c8690',
             icon: 'tabler:brand-github',
-            url: 'https://github.com/izmttk'
+            url: 'https://github.com/likalikali'
           },
           {
             label: 'bilibili',
             color: '#fc87b2',
             icon: 'tabler:brand-bilibili',
-            url: 'https://space.bilibili.com/293591084'
+            url: 'https://space.bilibili.com/13655166'
           },
           {
             label: 'netease music',
             color: '#ff4e6a',
             icon: 'tabler:brand-netease-music',
-            url: 'https://music.163.com/user/390631653'
+            url: 'https://music.163.com/user/562918722'
           },
-          {
-            label: 'twitter',
-            color: '#1d9bf0',
-            icon: 'tabler:brand-twitter',
-            url: 'https://twitter.com/vviderx'
-          },
+          //{
+            //label: 'twitter',
+            //color: '#1d9bf0',
+            //icon: 'tabler:brand-twitter',
+            //url: 'https://x.com/AuroraRaychan'
+          //},
           {
             label: 'mail',
             color: '#7562c7',
             icon: 'tabler:mail',
-            url: 'mailto:widergao@gmail.com'
+            url: 'mailto:likafeaturingnino@163.com'
           }
         ],
       },
@@ -180,7 +180,7 @@ const config: Config = {
       { label: '关于', url: url('about')},
       { label: '归档', url: url('archive')},
       { label: '友情链接', url: url('friends')},
-      { label: 'Github', url: 'https://github.com/izmttk'},
+      { label: 'Github', url: 'https://github.com/likalikali'},
     ],
     declarations: [
       `Copyright © ${getYear(new Date())} Anriri All Rights Reserved.`,
