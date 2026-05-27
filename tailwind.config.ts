@@ -2,47 +2,54 @@
 import type { Config } from 'tailwindcss'
 import type { PluginUtils } from 'tailwindcss/types/config'
 
-import tailwindScrollbarImport from 'tailwind-scrollbar'
-import typographyImport from '@tailwindcss/typography'
-// import clipPath from 'tailwind-clip-path'
-
+import { createRequire } from 'node:module'
 import plugin from 'tailwindcss/plugin'
 import colors from 'tailwindcss/colors'
 import defaultTheme from 'tailwindcss/defaultTheme'
 
-const getDefaultExport = <T>(mod: T): any =>
-  (mod as any)?.default ?? mod
+// Use Node's require here instead of ESM default imports.
+// This avoids CommonJS / ESM interop issues on Vercel when Tailwind loads
+// tailwind.config.ts through jiti.
+const require = createRequire(import.meta.url)
 
-const tailwindScrollbar = getDefaultExport(tailwindScrollbarImport)
-const typography = getDefaultExport(typographyImport)
-const gray = colors.gray;
-const primary = colors.blue;
-const secondary = colors.pink;
+const resolvePlugin = (mod: any) => {
+  if (typeof mod === 'function') return mod
+  if (mod && typeof mod.default === 'function') return mod.default
+  return mod?.default ?? mod
+}
+
+const tailwindScrollbar = resolvePlugin(require('tailwind-scrollbar'))
+const typography = resolvePlugin(require('@tailwindcss/typography'))
+
+const gray = colors.gray
+const primary = colors.blue
+const secondary = colors.pink
 
 const round = (num: number) =>
   num
     .toFixed(7)
     .replace(/(\.[0-9]+?)0+$/, '$1')
     .replace(/\.0$/, '')
+
 const rem = (px: number) => `${round(px / 16)}rem`
 const em = (px: number, base: number) => `${round(px / base)}em`
 
 export default {
-	content: [
+  content: [
     './src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}',
     './plugins/**/*.{js,ts}',
   ],
   darkMode: 'class',
   theme: {
-    fontFamily:{
-      sans: ['Inter Variable', 'Inter',  ...defaultTheme.fontFamily.sans],
+    fontFamily: {
+      sans: ['Inter Variable', 'Inter', ...defaultTheme.fontFamily.sans],
       mono: ['Fira Code Variable', 'Fira Code', ...defaultTheme.fontFamily.mono],
     },
     extend: {
       colors: {
-        gray: gray,
-        primary: primary,
-        secondary: secondary,
+        gray,
+        primary,
+        secondary,
         background: {
           DEFAULT: '#f5f5fa',
           light: '#f5f5fa',
@@ -63,13 +70,13 @@ export default {
             DEFAULT: gray[400],
             light: gray[400],
             dark: gray[600],
-          }
+          },
         },
         plate: {
           DEFAULT: colors.white,
           light: colors.white,
           dark: gray[800],
-        }
+        },
       },
       typography: ({ theme }: PluginUtils) => ({
         DEFAULT: {
@@ -122,7 +129,6 @@ export default {
               marginRight: 'auto',
             },
             table: {
-              // display: 'block',
               width: 'fit-content',
               overflowX: 'auto',
               marginLeft: 'auto',
@@ -309,6 +315,7 @@ export default {
       ? tailwindScrollbar({ nocompatible: true })
       : tailwindScrollbar,
     typeof typography === 'function' ? typography() : typography,
+
     // add a "ring-highlight" utility
     // which sets a top border highlight using box-shadow
     // thus conflicting with any other ring utilities
@@ -319,34 +326,35 @@ export default {
           'box-shadow': [
             `inset 0 1px 0 0 var(--tw-ring-color)`,
             `var(--tw-shadow, 0 0 #0000)`,
-          ].join(', ')
-        }
+          ].join(', '),
+        },
       })
     }),
-    plugin(({ addUtilities, theme }) => {
+
+    plugin(({ addUtilities }) => {
       addUtilities({
         '.plate-bg': {
-          '@apply bg-plate-light dark:bg-plate-dark': {}
+          '@apply bg-plate-light dark:bg-plate-dark': {},
         },
         '.plate-shadow': {
-          '@apply shadow-lg shadow-gray-900/10 dark:shadow-black/20': {}
+          '@apply shadow-lg shadow-gray-900/10 dark:shadow-black/20': {},
         },
         '.border-highlight': {
-          '@apply ring-1 ring-gray-600/10 dark:ring-highlight dark:ring-white/5': {}
+          '@apply ring-1 ring-gray-600/10 dark:ring-highlight dark:ring-white/5': {},
         },
         '.text-primary': {
-          '@apply text-text-primary-light dark:text-text-primary-dark': {}
+          '@apply text-text-primary-light dark:text-text-primary-dark': {},
         },
         '.text-secondary': {
-          '@apply text-text-secondary-light dark:text-text-secondary-dark': {}
+          '@apply text-text-secondary-light dark:text-text-secondary-dark': {},
         },
         '.text-disabled': {
-          '@apply text-text-disabled-light dark:text-text-disabled-dark': {}
+          '@apply text-text-disabled-light dark:text-text-disabled-dark': {},
         },
         '.pressable': {
-          '@apply active:scale-90': {}
-        }
+          '@apply active:scale-90': {},
+        },
       })
-    })
+    }),
   ],
-} satisfies Config;
+} satisfies Config
