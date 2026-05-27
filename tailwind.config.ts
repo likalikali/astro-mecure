@@ -4,17 +4,17 @@ import type { PluginUtils } from 'tailwindcss/types/config'
 
 import tailwindScrollbarImport from 'tailwind-scrollbar'
 import typographyImport from '@tailwindcss/typography'
-
-const tailwindScrollbar =
-  (tailwindScrollbarImport as any).default ?? tailwindScrollbarImport
-
-const typography =
-  (typographyImport as any).default ?? typographyImport
 // import clipPath from 'tailwind-clip-path'
 
 import plugin from 'tailwindcss/plugin'
 import colors from 'tailwindcss/colors'
 import defaultTheme from 'tailwindcss/defaultTheme'
+
+const getDefaultExport = <T>(mod: T): any =>
+  (mod as any)?.default ?? mod
+
+const tailwindScrollbar = getDefaultExport(tailwindScrollbarImport)
+const typography = getDefaultExport(typographyImport)
 const gray = colors.gray;
 const primary = colors.blue;
 const secondary = colors.pink;
@@ -305,44 +305,48 @@ export default {
     },
   },
   plugins: [
-  tailwindScrollbar({ nocompatible: true }),
-  typography,
-
-  plugin(({ addUtilities }) => {
-    addUtilities({
-      '.ring-highlight': {
-        'box-shadow': [
-          `inset 0 1px 0 0 var(--tw-ring-color)`,
-          `var(--tw-shadow, 0 0 #0000)`,
-        ].join(', ')
-      }
+    typeof tailwindScrollbar === 'function'
+      ? tailwindScrollbar({ nocompatible: true })
+      : tailwindScrollbar,
+    typeof typography === 'function' ? typography() : typography,
+    // add a "ring-highlight" utility
+    // which sets a top border highlight using box-shadow
+    // thus conflicting with any other ring utilities
+    // shadow utilities are not affected
+    plugin(({ addUtilities }) => {
+      addUtilities({
+        '.ring-highlight': {
+          'box-shadow': [
+            `inset 0 1px 0 0 var(--tw-ring-color)`,
+            `var(--tw-shadow, 0 0 #0000)`,
+          ].join(', ')
+        }
+      })
+    }),
+    plugin(({ addUtilities, theme }) => {
+      addUtilities({
+        '.plate-bg': {
+          '@apply bg-plate-light dark:bg-plate-dark': {}
+        },
+        '.plate-shadow': {
+          '@apply shadow-lg shadow-gray-900/10 dark:shadow-black/20': {}
+        },
+        '.border-highlight': {
+          '@apply ring-1 ring-gray-600/10 dark:ring-highlight dark:ring-white/5': {}
+        },
+        '.text-primary': {
+          '@apply text-text-primary-light dark:text-text-primary-dark': {}
+        },
+        '.text-secondary': {
+          '@apply text-text-secondary-light dark:text-text-secondary-dark': {}
+        },
+        '.text-disabled': {
+          '@apply text-text-disabled-light dark:text-text-disabled-dark': {}
+        },
+        '.pressable': {
+          '@apply active:scale-90': {}
+        }
+      })
     })
-  }),
-
-  plugin(({ addUtilities }) => {
-    addUtilities({
-      '.plate-bg': {
-        '@apply bg-plate-light dark:bg-plate-dark': {}
-      },
-      '.plate-shadow': {
-        '@apply shadow-lg shadow-gray-900/10 dark:shadow-black/20': {}
-      },
-      '.border-highlight': {
-        '@apply ring-1 ring-gray-600/10 dark:ring-highlight dark:ring-white/5': {}
-      },
-      '.text-primary': {
-        '@apply text-text-primary-light dark:text-text-primary-dark': {}
-      },
-      '.text-secondary': {
-        '@apply text-text-secondary-light dark:text-text-secondary-dark': {}
-      },
-      '.text-disabled': {
-        '@apply text-text-disabled-light dark:text-text-disabled-dark': {}
-      },
-      '.pressable': {
-        '@apply active:scale-90': {}
-      }
-    })
-  })
-],
+  ],
 } satisfies Config;
