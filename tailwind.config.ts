@@ -300,7 +300,7 @@ export default {
   },
   plugins: [
     tailwindScrollbar,
-    typography(),
+    typography,
     // add a "ring-highlight" utility
     // which sets a top border highlight using box-shadow
     // thus conflicting with any other ring utilities
