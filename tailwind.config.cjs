@@ -1,40 +1,25 @@
-// tailwind.config.ts
-import type { Config } from 'tailwindcss'
-import type { PluginUtils } from 'tailwindcss/types/config'
+// tailwind.config.cjs
+const plugin = require('tailwindcss/plugin')
+const colors = require('tailwindcss/colors')
+const defaultTheme = require('tailwindcss/defaultTheme')
 
-import { createRequire } from 'node:module'
-import plugin from 'tailwindcss/plugin'
-import colors from 'tailwindcss/colors'
-import defaultTheme from 'tailwindcss/defaultTheme'
-
-// Use Node's require here instead of ESM default imports.
-// This avoids CommonJS / ESM interop issues on Vercel when Tailwind loads
-// tailwind.config.ts through jiti.
-const require = createRequire(import.meta.url)
-
-const resolvePlugin = (mod: any) => {
-  if (typeof mod === 'function') return mod
-  if (mod && typeof mod.default === 'function') return mod.default
-  return mod?.default ?? mod
-}
-
-const tailwindScrollbar = resolvePlugin(require('tailwind-scrollbar'))
-const typography = resolvePlugin(require('@tailwindcss/typography'))
+const tailwindScrollbar = require('tailwind-scrollbar')
+const typography = require('@tailwindcss/typography')
 
 const gray = colors.gray
 const primary = colors.blue
 const secondary = colors.pink
 
-const round = (num: number) =>
+const round = (num) =>
   num
     .toFixed(7)
     .replace(/(\.[0-9]+?)0+$/, '$1')
     .replace(/\.0$/, '')
+const rem = (px) => `${round(px / 16)}rem`
+const em = (px, base) => `${round(px / base)}em`
 
-const rem = (px: number) => `${round(px / 16)}rem`
-const em = (px: number, base: number) => `${round(px / base)}em`
-
-export default {
+/** @type {import('tailwindcss').Config} */
+module.exports = {
   content: [
     './src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}',
     './plugins/**/*.{js,ts}',
@@ -78,7 +63,7 @@ export default {
           dark: gray[800],
         },
       },
-      typography: ({ theme }: PluginUtils) => ({
+      typography: ({ theme }) => ({
         DEFAULT: {
           css: {
             maxWidth: 'none',
@@ -311,15 +296,8 @@ export default {
     },
   },
   plugins: [
-    typeof tailwindScrollbar === 'function'
-      ? tailwindScrollbar({ nocompatible: true })
-      : tailwindScrollbar,
-    typeof typography === 'function' ? typography() : typography,
-
-    // add a "ring-highlight" utility
-    // which sets a top border highlight using box-shadow
-    // thus conflicting with any other ring utilities
-    // shadow utilities are not affected
+    tailwindScrollbar({ nocompatible: true }),
+    typography(),
     plugin(({ addUtilities }) => {
       addUtilities({
         '.ring-highlight': {
@@ -330,7 +308,6 @@ export default {
         },
       })
     }),
-
     plugin(({ addUtilities }) => {
       addUtilities({
         '.plate-bg': {
@@ -357,4 +334,4 @@ export default {
       })
     }),
   ],
-} satisfies Config
+}
