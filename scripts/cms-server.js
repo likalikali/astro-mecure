@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { exec, execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import matter from 'gray-matter';
+import { validateCmsImage } from './cms-image-validation.js';
 
 const execAsync = promisify(exec);
 const execFileAsync = promisify(execFile);
@@ -594,14 +595,18 @@ const server = http.createServer(async (req, res) => {
       if (!matches) {
         return sendJson(res, 400, { error: '无效的 Base64 图片格式' });
       }
-      const allowedImageMimeTypes = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif']);
-      if (!allowedImageMimeTypes.has(matches[1].toLowerCase())) {
-        return sendJson(res, 400, { error: '仅允许上传 PNG / JPEG / WebP / GIF 图片' });
-      }
+
       const buffer = Buffer.from(matches[2], 'base64');
-      const safeFile = path.basename(rawFilename || `img-${Date.now()}.png`).replace(/\s+/g, '-');
-      if (!IMAGE_EXTS.has(path.extname(safeFile).toLowerCase()) || path.extname(safeFile).toLowerCase() === '.svg') {
-        return sendJson(res, 400, { error: '不支持的图片扩展名' });
+      let safeFile;
+      try {
+        const validated = validateCmsImage({
+          filename: rawFilename || `img-${Date.now()}.png`,
+          mime: matches[1],
+          bytes: buffer,
+        });
+        safeFile = validated.filename;
+      } catch (error) {
+        return sendJson(res, 400, { error: error.message });
       }
       const targetDir = resolveBlogPath(slug);
       await fs.mkdir(targetDir, { recursive: true });
