@@ -1,0 +1,101 @@
+---
+import { Image } from 'astro:assets';
+import { url } from '@/utils/url';
+import yellow from '@/assets/memoirs/yellow.png';
+import white from '@/assets/memoirs/white.png';
+import green from '@/assets/memoirs/green.png';
+
+const periods = [
+  { title: '故乡时期', image: yellow, alt: '黄色玉米面团子', href: 'memoirs/hometown/' },
+  { title: '东北亚时期', image: white, alt: '雪白糯米团子', href: 'memoirs/northeast-asia/' },
+  { title: '江南时期', image: green, alt: '绿色青团', href: 'memoirs/jiangnan/' },
+];
+---
+
+<mochi-entrances>
+  <nav class="memoirs not-prose" aria-label="三个时期的回忆录">
+    {periods.map(period => (
+      <a class="memoir" href={url(period.href)} aria-label={`${period.title}回忆录（待写）`}>
+        <Image src={period.image} alt={period.alt} width={200} height={200} format="webp" loading="lazy" />
+        <span class="memoir-title">{period.title}</span>
+      </a>
+    ))}
+  </nav>
+</mochi-entrances>
+
+<script>
+  import { navigate } from 'astro:transitions/client';
+
+  class MochiEntrances extends HTMLElement {
+    private controller?: AbortController;
+    private bouncing = false;
+
+    connectedCallback() {
+      this.controller?.abort();
+      this.controller = new AbortController();
+      this.addEventListener('click', this.onClick, { signal: this.controller.signal });
+    }
+
+    disconnectedCallback() {
+      this.controller?.abort();
+    }
+
+    private onClick = async (event: MouseEvent) => {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const link = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>('a.memoir') : null;
+      const image = link?.querySelector('img');
+      if (!link || !image || link.target === '_blank' || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+      event.preventDefault();
+      if (this.bouncing) return;
+      this.bouncing = true;
+      const animation = image.animate([
+        { transform: 'scale(1, 1)', offset: 0 },
+        { transform: 'scale(1.2, 0.76)', offset: 0.22 },
+        { transform: 'translateY(-7px) scale(0.88, 1.14)', offset: 0.5 },
+        { transform: 'scale(1.06, 0.95)', offset: 0.75 },
+        { transform: 'scale(1, 1)', offset: 1 },
+      ], { duration: 420, easing: 'ease-in-out' });
+
+      try {
+        await animation.finished;
+        if (this.isConnected) await navigate(link.href);
+      } catch {
+        // A cancelled animation should not navigate away from another page.
+      } finally {
+        this.bouncing = false;
+      }
+    };
+  }
+
+  if (!customElements.get('mochi-entrances')) customElements.define('mochi-entrances', MochiEntrances);
+</script>
+
+<style>
+  mochi-entrances { display: block; }
+  .memoirs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(0.5rem, 3vw, 1.5rem);
+    max-width: 23rem;
+    margin: 1.25rem 0 1.75rem;
+  }
+  .memoir {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.25rem 0;
+    color: inherit;
+    text-align: center;
+    text-decoration: none;
+  }
+  .memoir img {
+    width: min(100%, 6.25rem);
+    height: auto;
+    margin: 0;
+    transform-origin: 50% 85%;
+  }
+  .memoir-title { font-size: 0.85rem; font-weight: 400; white-space: nowrap; }
+  .memoir:hover .memoir-title { text-decoration: underline; text-underline-offset: 4px; }
+  .memoir:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; border-radius: 0.25rem; }
+</style>

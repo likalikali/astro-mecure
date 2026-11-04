@@ -6,7 +6,7 @@ const config: Config = {
   title: 'Anriri',
   description: '大河の一滴。',
   author: 'Anriri',
-  favicon: url('favicon.svg'),
+  favicon: url('favicon-white-mochi.png'),
   navbar: {
     logo: import('@/custom/NavLogo.astro'),
     menu: [
@@ -56,7 +56,7 @@ const config: Config = {
         author: 'Anriri',
         description: '大河の一滴。',
         avatar: import('src/assets/avatar-sakura.webp'),
-        background: import('src/assets/profile-bg.jpg'),
+        background: import('src/assets/profile-bg.png'),
         socialIcons: [
           {
             label: 'github',

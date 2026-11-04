@@ -22,8 +22,11 @@ npm run preview
 - `src/content/authors/default.json`：文章作者信息
 - `src/content/blog/`：博客内容
 - `src/content/friends/`：友情链接（原模板的友链条目已移除，可自行添加）
-- `public/favicon.svg` 和 `public/favicon.ico`：标签页图标
+- `public/favicon-white-mochi.png` 和 `public/favicon.ico`：由 `src/assets/memoirs/white.png` 生成的白色团子图标，主页、404 页与浏览器标签页统一使用
 - `src/assets/avatar-sakura.webp`：侧边栏头像
+- `src/assets/memoirs/`：关于页的黄、白、绿团子原图
+- `src/components/MemoirEntrances.astro`：回忆录入口的时期名称、图片与链接
+- `src/pages/memoirs/`：故乡、东北亚、江南三个时期的待写页面，可直接补充正文
 
 ## 本地文章管理
 
