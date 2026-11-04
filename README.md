@@ -1,6 +1,6 @@
 # Anriri 记事簿
 
-个人博客：[suborbit.net](https://suborbit.net/)。使用 [Astro](https://astro.build/)、React、TypeScript 与 Tailwind CSS 搭建，并在开源主题 [astro-mecure](https://github.com/izmttk/astro-mecure) 上进行个性化修改。
+个人博客：[blog.anriri.pp.ua](https://blog.anriri.pp.ua/)。使用 [Astro](https://astro.build/)、React、TypeScript 与 Tailwind CSS 搭建，并在开源主题 [astro-mecure](https://github.com/izmttk/astro-mecure) 上进行个性化修改。
 
 ## 本地运行
 
@@ -41,6 +41,6 @@ npm run studio
 
 ## 许可证及来源
 
-本项目沿用上游主题的 MIT 许可证。原版权声明按许可证要求保留在 [LICENSE](./LICENSE)，网站素材来源见[引用声明](https://suborbit.net/reference)。
+本项目沿用上游主题的 MIT 许可证。原版权声明按许可证要求保留在 [LICENSE](./LICENSE)，网站素材来源见[引用声明](https://blog.anriri.pp.ua/reference)。
 
 清理与安全检查记录见 [项目审计](./docs/PROJECT_AUDIT_2026-11-04.md)。

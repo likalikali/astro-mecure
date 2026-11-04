@@ -1,13 +1,18 @@
 # Anriri 项目清理审计（2026-11-04）
 
-审计仓库：`likalikali/astro-mecure`；目标站点：`https://suborbit.net/`。
+审计仓库：`likalikali/astro-mecure`；目标站点：`https://blog.anriri.pp.ua/`。
 
 本次以仓库目录树、站点配置、页面、内容集合、本地 CMS、依赖清单和较大的 TS/TSX/Astro 文件为依据做静态审查。源代码保留 Git 历史；未执行生产环境部署和在线渗透测试，不能将此文当作完整安全认证。
+
+## 关键域名纠错
+
+核对公开站点发现 `suborbit.net` 是原主题作者“银河渡舟”的博客，不是本站。原 CMS 与“关于”页的明确自有域名为 `blog.anriri.pp.ua`。已修正 Astro 的 `site`、文章作者头像绝对地址、管理后台和项目文档，避免生产构建的 canonical、RSS、sitemap 指向原作者站点。
 
 ## 已处理的问题
 
 | 级别 | 问题 | 处理 |
 | --- | --- | --- |
+| 高 | `astro.config.ts` 的 `site` 与文章作者头像原来指向原作者域名 | 更正为站点配置中已有的 `blog.anriri.pp.ua`，上线前需核对实际部署域名 |
 | 高 | 评论指向原作者的 `izmttk/izmttk.github.io` Giscus，访客留言可能发到错误仓库 | 在 `src/config.ts` 中关闭评论，待本站自己的 Discussions 与分类 ID 配齐后启用 |
 | 高 | 搜索使用旧 Algolia 应用和 `wider` 索引 | 移除过期凭据，隐藏搜索按钮，避免查询发送到第三方索引 |
 | 高 | 本地 CMS 把提交说明拼进 Shell 命令，允许特殊字符造成命令执行 | Git commit 改用 `execFile` 和参数列表；保留固定的 Git 命令 |
@@ -18,7 +23,7 @@
 | 低 | 个人介绍、更新日志、README 中残留上游作者的生平、发布说明和 Netlify 徽章 | 改为本站自己的中性信息、维护记录与使用说明 |
 | 低 | 友链申请跳到上游仓库；存在自指友链 `wider` | 更换 PR 地址，移除自指条目，保留其他友链待维护者核对 |
 | 低 | 推荐主题组件跳向上游仓库，旧头像文件残留 | 从侧边栏移除推荐组件并清理未使用的旧头像/推荐封面 |
-| 低 | 站内引用声明含旧邮箱，CMS 多处仍用旧二级域名 | 更新为站点现有联系邮箱与 `suborbit.net` |
+| 低 | 站内引用声明含旧邮箱，CMS 多处仍用旧二级域名 | 更新为站点现有联系邮箱与 `blog.anriri.pp.ua` |
 | 低 | 浏览器 favicon 仍是原主题图标 | 增加自制樱花大福 `favicon.svg`，同时替换 `favicon.ico`，提供浏览器兼容回退 |
 
 ## 明确保留的内容

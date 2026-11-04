@@ -17,7 +17,7 @@ const UI_DIR = path.join(__dirname, 'cms-ui');
 const TRASH_DIR = path.join(ROOT_DIR, '_drafts', '.trash');
 
 const PORT = Number(process.env.CMS_PORT || 4322);
-const SITE_URL = 'https://suborbit.net';
+const SITE_URL = 'https://blog.anriri.pp.ua';
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -730,7 +730,7 @@ const server = http.createServer(async (req, res) => {
         return sendJson(res, 200, {
           ok: true,
           message: push
-            ? '已成功提交并推送到 GitHub！线上站点 suborbit.net 将根据部署设置更新。'
+            ? '已成功提交并推送到 GitHub！线上站点 blog.anriri.pp.ua 将根据部署设置更新。'
             : '已成功提交到本地 Git 仓库！',
           logs,
           gitStatus: updatedStatus,
@@ -792,6 +792,6 @@ server.listen(PORT, '127.0.0.1', () => {
   console.log(`\n========================================================`);
   console.log(`  🚀 Anriri Blog Studio 可视化文章发布系统已启动`);
   console.log(`  👉 管理后台地址: http://localhost:${PORT}`);
-  console.log(`  🌐 线上博客地址: https://suborbit.net`);
+  console.log(`  🌐 线上博客地址: https://blog.anriri.pp.ua`);
   console.log(`========================================================\n`);
 });

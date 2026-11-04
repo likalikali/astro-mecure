@@ -29,7 +29,7 @@ import rehypePostRaw from './plugins/rehype/rehype-post-raw';
 
 // https://astro.build/config
 const config: AstroUserConfig = {
-  site: 'https://suborbit.net/',
+  site: 'https://blog.anriri.pp.ua/',
   // base: 'blog',
   output: 'static',
   integrations: [
