@@ -27,7 +27,12 @@ const blog = defineCollection({
     tags: z.string().array().default([]),
     category: z.string().array().default([]),
     permalink: z.string().optional(),
-    cardVariant: z.enum(['blur', 'material', 'full', 'plain']).default('blur')
+    cardVariant: z.enum(['blur', 'material', 'full', 'plain']).default('blur'),
+    access: z.object({
+      password: z.string().min(1),
+      hint: z.string().optional(),
+      excerpt: z.string().optional(),
+    }).optional(),
   }).refine(
     val => val.tags.every((item, index) => val.tags.indexOf(item) === index),
     val => ({ 

@@ -2,6 +2,9 @@
 dist/
 .output/
 
+# agent
+helloagents/
+
 # dependencies
 node_modules
 

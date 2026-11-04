@@ -8,6 +8,7 @@ import ArticleOutdateTip from '@/components/ArticleOutdateTip';
 import ArticleLicense from '@/components/ArticleLicense';
 import config from '@/config';
 import PostMeta from '@/components/PostMeta';
+import ProtectedPostContent from '@/components/ProtectedPost';
 import { compareAsc } from 'date-fns';
 
 export interface Props {
@@ -48,6 +49,7 @@ const next = nextProp ? Object.fromEntries(
 
 const outdateTipConfig = config.article?.outdateTip;
 const licenseConfig = config.article?.license;
+const protectedContent = post.access?.encryptedContent;
 ---
 
 <PostLayout post={post} prev={prev} next={next}>
@@ -70,7 +72,19 @@ const licenseConfig = config.article?.license;
       />
     }
   </div>
-  <Content components={MDXComponents} />
+  {
+    protectedContent ? (
+      <ProtectedPostContent
+        slug={post.slug}
+        title={post.title}
+        hint={post.access?.hint}
+        encryptedContent={protectedContent}
+        client:load
+      />
+    ) : (
+      <Content components={MDXComponents} />
+    )
+  }
   <div class="not-prose -mx-4 md:-mx-8 mt-4 md:mt-8" slot="footer">
     {
       licenseConfig && <ArticleLicense

@@ -8,13 +8,21 @@ const generateFrontmatter = ({
   title,
   image,
   draft,
-  date
+  date,
+  accessPassword,
+  accessHint,
+  accessExcerpt
 }) => {
   let frontmatter = '';
   if (title) frontmatter += `title: ${title}\n`;
   if (image) frontmatter += `image: ${image}\n`;
   if (draft) frontmatter += `draft: ${draft}\n`;
   if (date) frontmatter += `date: ${date}\n`;
+  if (accessPassword) {
+    frontmatter += `access:\n  password: ${JSON.stringify(accessPassword)}\n`;
+    if (accessHint) frontmatter += `  hint: ${JSON.stringify(accessHint)}\n`;
+    if (accessExcerpt) frontmatter += `  excerpt: ${JSON.stringify(accessExcerpt)}\n`;
+  }
   return frontmatter;
 }
 
@@ -22,10 +30,13 @@ const generateMarkdownTemplate = ({
   title,
   image,
   draft,
-  date
+  date,
+  accessPassword,
+  accessHint,
+  accessExcerpt
 }) => (
 `---
-${generateFrontmatter({ title, image, draft, date })}
+${generateFrontmatter({ title, image, draft, date, accessPassword, accessHint, accessExcerpt })}
 ---
 
 ## Title
@@ -80,6 +91,24 @@ async function main() {
       message: 'What\'s the article image? (press enter to skip)',
     },
     {
+      type: 'password',
+      name: 'accessPassword',
+      message: 'Access password? (press enter to skip)',
+      mask: '*',
+    },
+    {
+      type: 'input',
+      name: 'accessHint',
+      message: 'Password hint? (press enter to skip)',
+      when: answers => Boolean(answers.accessPassword),
+    },
+    {
+      type: 'input',
+      name: 'accessExcerpt',
+      message: 'Public excerpt for protected article? (press enter to skip)',
+      when: answers => Boolean(answers.accessPassword),
+    },
+    {
       type: 'confirm',
       name: 'confirm',
       message: answers => `We will create mdx file at ${path.join(contentDir, `${answers.title}.mdx`)}, continue?`,
@@ -92,7 +121,10 @@ async function main() {
     title: response.title,
     image: response.image,
     draft: response.draft,
-    date: createDate.toISOString()
+    date: createDate.toISOString(),
+    accessPassword: response.accessPassword,
+    accessHint: response.accessHint,
+    accessExcerpt: response.accessExcerpt,
   });
   const file = path.join(contentDir, `${response.title}.mdx`);
   await fs.writeFile(file, template, {

@@ -1,6 +1,7 @@
 import { compareDesc, getYear } from 'date-fns';
 import { Feed } from 'feed';
 import getPosts from './getPosts';
+import type { Post } from '@/types';
 
 interface RssFeedOptions {
   title: string;
@@ -9,6 +10,19 @@ interface RssFeedOptions {
   author?: string;
   favicon?: string;
   format: 'xml' | 'json';
+}
+
+function getFeedImageUrl(image: Post['image'], site: string) {
+  if (!image) {
+    return undefined;
+  }
+  if (typeof image === 'string') {
+    return new URL(image, site).href;
+  }
+  if ('src' in image) {
+    return new URL(image.src, site).href;
+  }
+  return undefined;
 }
 
 export default async function generateRssFeed(options: RssFeedOptions) {
@@ -44,10 +58,7 @@ export default async function generateRssFeed(options: RssFeedOptions) {
       date: post.date,
       content: post.raw,
       author: [{ name: post.author.name }],
-      image: post.image ? (
-        typeof post.image === 'string' ? new URL(post.image, site).href 
-        : new URL(post.image.src, site).href
-      ) : undefined,
+      image: getFeedImageUrl(post.image, site),
     })
   });
   if (format === 'xml') {

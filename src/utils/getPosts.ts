@@ -1,4 +1,4 @@
-import type { Author, Post } from '@/types';
+import type { Post } from '@/types';
 import config from '@/config';
 import { type CollectionEntry, getCollection, getEntry } from 'astro:content';
 
@@ -9,6 +9,7 @@ import transformCategory from './transformCategory';
 import { url } from './url';
 import getFileCreateTime from './getFileCreateTime';
 import getFileUpdateTime from './getFileUpdateTime';
+import { encryptProtectedContent, PROTECTED_POST_EXCERPT, PROTECTED_POST_RAW } from './protectedContent';
 import { CONTENT_DIR, BLOG_COLLECTION_NAME as collection } from '@/constants';
 
 function getPostPath(id: string) {
@@ -58,6 +59,16 @@ async function getPosts(): Promise<Post[]> {
     const author = (await getEntry(post.data.author)).data ?? {name: config.author};
     const date = post.data.date ?? getFileCreateTime(getPostPath(post.id));
     const updateDate = post.data.updateDate ?? getFileUpdateTime(getPostPath(post.id));
+    const raw = remarkPluginFrontmatter.raw ?? '';
+    const accessConfig = post.data.access;
+    const accessExcerpt = accessConfig?.excerpt ?? PROTECTED_POST_EXCERPT;
+    const access = accessConfig ? {
+      isProtected: true as const,
+      excerpt: accessExcerpt,
+      encryptedContent: encryptProtectedContent(raw, accessConfig.password),
+      ...(accessConfig.hint ? { hint: accessConfig.hint } : {}),
+    } : undefined;
+
     return {
       slug: post.data.permalink ?? post.slug,
       title: post.data.title ?? '无标题',
@@ -76,11 +87,12 @@ async function getPosts(): Promise<Post[]> {
         count: tagsBucket.get(tag.label) ?? 1,
       })),
       cardVariant: post.data.cardVariant,
-      raw: remarkPluginFrontmatter.raw,
-      excerpt: remarkPluginFrontmatter.excerpt,
+      ...(access ? { access } : {}),
+      raw: access ? PROTECTED_POST_RAW : raw,
+      excerpt: access ? accessExcerpt : remarkPluginFrontmatter.excerpt,
       readingTime: remarkPluginFrontmatter.readingTime,
       wordCount: remarkPluginFrontmatter.wordCount,
-      headings: headings,
+      headings: access ? [] : headings,
       Content: Content,
     }
   }))

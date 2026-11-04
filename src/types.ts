@@ -19,6 +19,22 @@ export interface Author {
   description?: string;
 }
 
+export interface ProtectedContentPayload {
+  algorithm: 'AES-GCM';
+  kdf: 'PBKDF2-SHA-256';
+  iterations: number;
+  salt: string;
+  iv: string;
+  ciphertext: string;
+}
+
+export interface PostAccess {
+  isProtected: true;
+  hint?: string;
+  excerpt: string;
+  encryptedContent: ProtectedContentPayload;
+}
+
 export interface Post {
   slug: string;
   url: string;
@@ -36,6 +52,7 @@ export interface Post {
   readingTime?: number;
   wordCount?: number;
   cardVariant?: 'blur' | 'material' | 'full' | 'plain';
+  access?: PostAccess;
 
   raw: string;
   headings: MarkdownHeading[];

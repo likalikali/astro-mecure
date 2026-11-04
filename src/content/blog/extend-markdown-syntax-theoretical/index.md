@@ -148,7 +148,6 @@ const tokenize: Tokenizer = function(effects, ok, nok) {
     // ...
     return start;
 }
-
 ```
 
 effects 提供了诸多便捷的方法，常用的有
@@ -299,7 +298,6 @@ export const fromMarkdown = (): FromMarkdownExtension => {
 ### 从 MDAST 到 HAST
 
 从 MDAST 到 HAST 的转换规则由 remark-rehype 插件控制，更准确说，由 [mdast-util-to-hast repo](https://github.com/syntax-tree/mdast-util-to-hast) 这个工具实现。这个工具预设了 MDAST 中默认节点到到 HAST 的转换规则，对于非默认节点，工具会检查 MDAST 节点中 data 属性中是否包含 `hName`、`hProperties`、`hChildren` 这三个属性，并将它们作为 HAST 节点的 `tagName`、`properties`、`children` 属性。这样，我们只需要在 MDAST 节点中添加这几个属性，就能实现自定义节点到 HAST 的转换规则。
-
 
 我们可以在 MDAST 节点创建的时候，就添加这些属性
 
