@@ -5,8 +5,8 @@ import { url } from '@/utils/url';
 const config: Config = {
   title: 'Anriri',
   description: '大河の一滴。',
-  author: 'Wider',
-  favicon: url('favicon.ico'),
+  author: 'Anriri',
+  favicon: url('favicon.svg'),
   navbar: {
     logo: import('@/custom/NavLogo.astro'),
     menu: [
@@ -40,25 +40,8 @@ const config: Config = {
         url: url('/about'),
         icon: 'tabler:info-circle'
       },
-      // {
-      //   label: '菜单示例',
-      //   icon: 'tabler:menu-2',
-      //   children: [
-      //     { label: 'SubItem1', url: '#', icon: 'tabler:circle'},
-      //     { label: 'SubItem2', url: '#', icon: 'tabler:circle'},
-      //     {
-      //       label: 'SubItem3',
-      //       icon: 'tabler:menu-2',
-      //       children: [
-      //         { label: 'SubItem1', url: '#', icon: 'tabler:circle'},
-      //         { label: 'SubItem2', url: '#', icon: 'tabler:circle'},
-      //         { label: 'SubItem3', url: '#', icon: 'tabler:circle'},
-      //       ]
-      //     },
-      //   ]
-      // },
     ],
-    hasSearchToggle: true,
+    hasSearchToggle: false,
     hasThemeToggle: true,
   },
   hero: {
@@ -93,12 +76,6 @@ const config: Config = {
             icon: 'tabler:brand-netease-music',
             url: 'https://music.163.com/user/562918722'
           },
-          //{
-            //label: 'twitter',
-            //color: '#1d9bf0',
-            //icon: 'tabler:brand-twitter',
-            //url: 'https://x.com/AuroraRaychan'
-          //},
           {
             label: 'mail',
             color: '#7562c7',
@@ -119,10 +96,6 @@ const config: Config = {
         order: 'desc',
         expandDepth: 2,
       },
-      {
-        name: 'component',
-        component: import('@/components/custom/Recommend.astro'),
-      },
     ]
   },
   pagination: {
@@ -142,37 +115,8 @@ const config: Config = {
       infoText: '转载或引用本文时请注明作者及出处，不得用于商业用途。',
     }
   },
-  comment: {
-    provider: 'giscus',
-    options: {
-      repo: 'izmttk/izmttk.github.io',
-      repoId: 'R_kgDOJIxtIQ',
-      category: 'General',
-      categoryId: 'DIC_kwDOJIxtIc4CU1cl',
-      mapping: 'pathname',
-      reactionsEnabled: '1',
-      emitMetadata: '0',
-      inputPosition: 'top',
-      lang: 'zh-CN',
-    },
-    // provider: 'waline',
-    // options: {
-    //   serverURL: 'https://waline-vercel.wider.ink/',
-    //   meta: ['nick', 'mail', 'link'],
-    //   requiredMeta: ['nick', 'mail'],
-    //   wordLimit: 200,
-    //   commentSorting: 'latest',
-    //   login: 'disable',
-    //   search: false,
-    //   copyright: false,
-    //   reaction: false,
-    //   emoji: [
-    //     '//unpkg.com/@waline/emojis@1.1.0/weibo',
-    //     '//unpkg.com/@waline/emojis@1.1.0/bilibili',
-    //     // '//cdn.jsdelivr.net/gh/GamerNoTitle/ValineCDN@master/Coolapk/',
-    //   ],
-    // }
-  },
+  // 未配置本站评论仓库前保持关闭，避免发送到原主题作者的仓库。
+  comment: false,
   footer: {
     links: [
       { label: '更新日志', url: url('changelog')},
@@ -185,15 +129,10 @@ const config: Config = {
     declarations: [
       `Copyright © ${getYear(new Date())} Anriri All Rights Reserved.`,
     ],
-    generator: true,
+    generator: false,
     rss: true,
     sitemap: true,
   },
-  algolia: {
-    appId: "1IIXBX6FGH",
-    apiKey: "91aa4234096f4963e33d53262340b1ec",
-    indexName: "wider",
-  }
 }
 
 export default config;

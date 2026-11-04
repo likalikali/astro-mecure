@@ -49,7 +49,7 @@ async function getPosts(): Promise<Post[]> {
   if (cache !== null) {
     return cache;
   }
-  const posts = await getCollection(collection);
+  const posts = await getCollection(collection, ({ data }) => !data.draft);
 
   const tagsBucket = countTags(posts);
   const categoriesBucket = countCategories(posts);

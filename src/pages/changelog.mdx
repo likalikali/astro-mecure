@@ -1,60 +1,16 @@
 ---
 layout: '@/layouts/MarkdownLayout.astro'
 title: 更新日志
+description: 本站的实际维护记录
 sidebar: false
 ---
 
-## TODO
+## 2026-11-04
 
-- more postcard variants
-- refine styles
-- improve theme config
-- seo optimizing
-- support more comment system
-- i18n support ?
+- 为个人主页与作者信息更换了樱花主题头像。
+- 用定制的樱花大福图标替换浏览器标签页图标。
+- 排查并整理了模板遗留的站点身份、旧地址、链接、文档与示例文章。
+- 暂时关闭仍指向其他站点的评论服务与搜索索引，待本站独立配置后再开启。
+- 为本地文章管理后台补充安全防护。
 
-## 2023.7.3, v0.2.0 Support Astro v2.6.0 and above.
-
-- Support Astro v2.6.0 and above.
-- Using experimental `Assets` Feature to load images.
-- Support admonition feature in `*.md` files.
-- Add outdate tip for posts. You can config it in `typography.outdateTip`.
-- Add license info for posts. You can config it in `typography.license`.
-- Change tailwindcss config file to `tailwind.config.ts`.
-- Support editing your friends in content collections.
-- Support adding author info in content collections. Now you can reference an author by file name, the `default.json` is used as default author info.
-- Change several config fields.
-- Update dependencies to latest version.
-- Improve styles.
-- Rewrite some components in Astro's syntax.
-- Remove Pjax feature as Astro may support it in the future.
-- Fix some bugs.
-
-
-## 2023.2.15, v0.1.1 Add multiple pages. 
-
-add about me, friends, changelog, reference page.\
-fix some style and hydration bugs.
-
-## 2023.2.10, v0.1.0 Complete basic functions. 
-
-- Blazing-fast performance, built by [Astro](https://astro.build/)
-- Refined site styles and components, responsive layout.
-- Support [MDX](https://mdxjs.com/), including typography styles, code highlight, admonition components by markdown directive, emoji, math formula by katex, and mermaid diagram syntax.
-- Support Toc(Table of Content) for posts.
-- Support Comments (Giscus and Waline)
-- Page routes like [Hexo](https://hexo.io/), cause I have used it before. This means that we will have following routes:
-  - `/`, index page, also the first page of recent posts.
-  - `/page/<page_number>`, recent posts page will be seperated into pages excluding the first page.
-  - `/posts/<your_post_title>`, which all posts will generate at.
-  - `/tags`, all tags will be displayed in here.
-  - `/tags/<your_tag>`, post list with specific tag.
-  - `/categories`, all categories will be displayed in here.
-  - `/categories/<your_category>`, post list with specific category.
-  - `/archive`, archive page will show all posts in timeline.
-  - other pages added after.
-- Support configurable theme.
-- Support algolia docsearch.
-- Support color mode switching.
-- Support generating RSS feed.
-- Support generating sitemap.
+后续更新会继续记录在这里。原开源主题自身的版本历史可查看 [上游仓库](https://github.com/izmttk/astro-mecure)。

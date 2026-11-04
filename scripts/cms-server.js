@@ -3,11 +3,12 @@ import fs from 'node:fs/promises';
 import fsSync from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { exec } from 'node:child_process';
+import { exec, execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import matter from 'gray-matter';
 
 const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT_DIR = path.resolve(__dirname, '..');
@@ -16,6 +17,7 @@ const UI_DIR = path.join(__dirname, 'cms-ui');
 const TRASH_DIR = path.join(ROOT_DIR, '_drafts', '.trash');
 
 const PORT = Number(process.env.CMS_PORT || 4322);
+const SITE_URL = 'https://suborbit.net';
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -37,6 +39,7 @@ function sendJson(res, status, data) {
   res.writeHead(status, {
     'Content-Type': 'application/json; charset=utf-8',
     'Cache-Control': 'no-store',
+    'X-Content-Type-Options': 'nosniff',
   });
   res.end(JSON.stringify(data));
 }
@@ -293,7 +296,8 @@ function sanitizeSlug(input) {
   return String(input || '')
     .trim()
     .replace(/[\\/:*?"<>|]/g, '-')
-    .replace(/\s+/g, '-');
+    .replace(/\s+/g, '-')
+    .replace(/^\.+|\.+$/g, '');
 }
 
 async function runGitCommand(cmd) {
@@ -305,6 +309,26 @@ async function runGitCommand(cmd) {
     stdout: stdout.replace(/[\r\n]+$/, ''),
     stderr: stderr.replace(/[\r\n]+$/, ''),
   };
+}
+
+// Avoid shell interpolation for user-provided commit messages.
+async function runGitArgs(args) {
+  const { stdout, stderr } = await execFileAsync('git', args, {
+    cwd: ROOT_DIR,
+    maxBuffer: 10 * 1024 * 1024,
+  });
+  return {
+    stdout: stdout.replace(/[\r\n]+$/, ''),
+    stderr: stderr.replace(/[\r\n]+$/, ''),
+  };
+}
+
+function resolveBlogPath(relativePath) {
+  const fullPath = path.resolve(BLOG_DIR, relativePath);
+  if (!fullPath.startsWith(BLOG_DIR + path.sep)) {
+    throw new Error('非法路径访问');
+  }
+  return fullPath;
 }
 
 async function getGitStatus() {
@@ -360,7 +384,7 @@ async function getGitStatus() {
     return {
       branch: branchRes.stdout || 'main',
       remote: remoteRes.stdout || 'https://github.com/likalikali/astro-mecure.git',
-      siteUrl: 'https://blog.anriri.pp.ua',
+      siteUrl: SITE_URL,
       ahead,
       behind,
       changes,
@@ -370,7 +394,7 @@ async function getGitStatus() {
     return {
       branch: 'main',
       remote: '',
-      siteUrl: 'https://blog.anriri.pp.ua',
+      siteUrl: SITE_URL,
       ahead: 0,
       behind: 0,
       changes: [],
@@ -382,6 +406,20 @@ async function getGitStatus() {
 
 const server = http.createServer(async (req, res) => {
   try {
+    // Only serve the local editor to requests addressed to this loopback port.
+    const allowedHosts = [`localhost:${PORT}`, `127.0.0.1:${PORT}`];
+    if (!allowedHosts.includes(req.headers.host || '')) {
+      return sendJson(res, 403, { error: '未授权的 Host' });
+    }
+    if (req.headers.origin) {
+      const allowedOrigins = allowedHosts.map(host => `http://${host}`);
+      if (!allowedOrigins.includes(req.headers.origin)) {
+        return sendJson(res, 403, { error: '跨站请求已被拒绝' });
+      }
+    }
+    if (req.headers['sec-fetch-site'] === 'cross-site') {
+      return sendJson(res, 403, { error: '跨站请求已被拒绝' });
+    }
     const reqUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
     const pathname = reqUrl.pathname;
 
@@ -395,7 +433,7 @@ const server = http.createServer(async (req, res) => {
       const id = reqUrl.searchParams.get('id');
       if (!id) return sendJson(res, 400, { error: '缺少文章 id 参数' });
       const safeRel = path.normalize(id).replace(/^(\.\.(\/|\\|$))+/, '');
-      const fullPath = path.join(BLOG_DIR, safeRel);
+      const fullPath = resolveBlogPath(safeRel);
       if (!fullPath.startsWith(BLOG_DIR)) {
         return sendJson(res, 403, { error: '非法路径访问' });
       }
@@ -420,7 +458,7 @@ const server = http.createServer(async (req, res) => {
       const slug = reqUrl.searchParams.get('slug') || '';
       const file = reqUrl.searchParams.get('file') || '';
       const cleanFile = file.replace(/^\.\//, '');
-      const targetPath = path.join(BLOG_DIR, sanitizeSlug(slug), path.basename(cleanFile));
+      const targetPath = resolveBlogPath(path.join(sanitizeSlug(slug), path.basename(cleanFile)));
       if (!targetPath.startsWith(BLOG_DIR) || !fsSync.existsSync(targetPath)) {
         res.writeHead(404);
         return res.end('Not found');
@@ -449,7 +487,7 @@ const server = http.createServer(async (req, res) => {
       }
 
       const targetRelId = isFolder ? `${slug}/index${ext}` : `${slug}${ext}`;
-      const targetFullPath = path.join(BLOG_DIR, targetRelId);
+      const targetFullPath = resolveBlogPath(targetRelId);
 
       // Check collision if creating a new post or renaming
       if (!originalId || originalId !== targetRelId) {
@@ -466,7 +504,7 @@ const server = http.createServer(async (req, res) => {
 
       // If converting or renaming from an existing post
       if (originalId && originalId !== targetRelId) {
-        const oldFullPath = path.join(BLOG_DIR, path.normalize(originalId).replace(/^(\.\.(\/|\\|$))+/, ''));
+        const oldFullPath = resolveBlogPath(path.normalize(originalId).replace(/^(\.\.(\/|\\|$))+/, ''));
         if (oldFullPath.startsWith(BLOG_DIR) && fsSync.existsSync(oldFullPath)) {
           const oldIsFolder = originalId.includes('/') || originalId.includes('\\');
           if (oldIsFolder && isFolder) {
@@ -517,7 +555,7 @@ const server = http.createServer(async (req, res) => {
       const id = reqUrl.searchParams.get('id');
       if (!id) return sendJson(res, 400, { error: '缺少 id 参数' });
       const safeRel = path.normalize(id).replace(/^(\.\.(\/|\\|$))+/, '');
-      const fullPath = path.join(BLOG_DIR, safeRel);
+      const fullPath = resolveBlogPath(safeRel);
       if (!fullPath.startsWith(BLOG_DIR) || !fsSync.existsSync(fullPath)) {
         return sendJson(res, 404, { error: '文章不存在' });
       }
@@ -556,9 +594,16 @@ const server = http.createServer(async (req, res) => {
       if (!matches) {
         return sendJson(res, 400, { error: '无效的 Base64 图片格式' });
       }
+      const allowedImageMimeTypes = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/avif']);
+      if (!allowedImageMimeTypes.has(matches[1].toLowerCase())) {
+        return sendJson(res, 400, { error: '仅允许上传 PNG / JPEG / WebP / GIF / AVIF 图片' });
+      }
       const buffer = Buffer.from(matches[2], 'base64');
       const safeFile = path.basename(rawFilename || `img-${Date.now()}.png`).replace(/\s+/g, '-');
-      const targetDir = path.join(BLOG_DIR, slug);
+      if (!IMAGE_EXTS.has(path.extname(safeFile).toLowerCase()) || path.extname(safeFile).toLowerCase() === '.svg') {
+        return sendJson(res, 400, { error: '不支持的图片扩展名' });
+      }
+      const targetDir = resolveBlogPath(slug);
       await fs.mkdir(targetDir, { recursive: true });
 
       // If the post was previously a single file (<slug>.md or <slug>.mdx), migrate it into <slug>/index.md(x)
@@ -665,9 +710,9 @@ const server = http.createServer(async (req, res) => {
           .filter(l => l && !l.startsWith('??') && !l.startsWith(' '));
 
         if (stagedLines.length > 0) {
-          const msg = (commitMessage || `post: 更新博客文章 (${new Date().toLocaleString('zh-CN')})`).replace(/"/g, '\\"');
-          logs.push({ step: 'git commit', status: 'running', detail: `git commit -m "${msg}"` });
-          const commitRes = await runGitCommand(`git commit -m "${msg}"`);
+          const msg = commitMessage || `post: 更新博客文章 (${new Date().toLocaleString('zh-CN')})`;
+          logs.push({ step: 'git commit', status: 'running', detail: 'git commit -m [message]' });
+          const commitRes = await runGitArgs(['commit', '-m', msg]);
           logs[logs.length - 1].status = 'done';
           logs[logs.length - 1].output = commitRes.stdout;
         } else {
@@ -685,7 +730,7 @@ const server = http.createServer(async (req, res) => {
         return sendJson(res, 200, {
           ok: true,
           message: push
-            ? '已成功提交并推送到 GitHub！线上站点 blog.anriri.pp.ua 将自动构建更新。'
+            ? '已成功提交并推送到 GitHub！线上站点 suborbit.net 将根据部署设置更新。'
             : '已成功提交到本地 Git 仓库！',
           logs,
           gitStatus: updatedStatus,
@@ -724,8 +769,8 @@ const server = http.createServer(async (req, res) => {
     }
 
     // Serve Static UI Files
-    let filePath = pathname === '/' ? path.join(UI_DIR, 'index.html') : path.join(UI_DIR, pathname);
-    if (!filePath.startsWith(UI_DIR) || !fsSync.existsSync(filePath) || fsSync.statSync(filePath).isDirectory()) {
+    let filePath = pathname === '/' ? path.join(UI_DIR, 'index.html') : path.resolve(UI_DIR, '.' + pathname);
+    if (!filePath.startsWith(UI_DIR + path.sep) || !fsSync.existsSync(filePath) || fsSync.statSync(filePath).isDirectory()) {
       filePath = path.join(UI_DIR, 'index.html');
     }
 
@@ -734,6 +779,7 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(200, {
       'Content-Type': MIME_TYPES[ext] || 'text/plain; charset=utf-8',
       'Cache-Control': 'no-store',
+      'X-Content-Type-Options': 'nosniff',
     });
     res.end(content);
   } catch (err) {
@@ -746,6 +792,6 @@ server.listen(PORT, '127.0.0.1', () => {
   console.log(`\n========================================================`);
   console.log(`  🚀 Anriri Blog Studio 可视化文章发布系统已启动`);
   console.log(`  👉 管理后台地址: http://localhost:${PORT}`);
-  console.log(`  🌐 线上博客地址: https://blog.anriri.pp.ua`);
+  console.log(`  🌐 线上博客地址: https://suborbit.net`);
   console.log(`========================================================\n`);
 });

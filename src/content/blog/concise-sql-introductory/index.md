@@ -1,4 +1,5 @@
 ---
+draft: true
 title: SQL简明手册入门篇
 date: 2021-02-17 20:14:21
 tags:

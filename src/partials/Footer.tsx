@@ -65,7 +65,7 @@ export default function Footer({
         </div>}
         {/* Site Info */}
         <div className='flex flex-wrap gap-x-3'>
-          {generator && <span>Powered By <a href='https://astro.build/' target='_blank'><AstroLogo className='inline' />Astro</a> · Designed By 银河渡舟.</span>}
+          {generator && <span>Powered By <a href='https://astro.build/' target='_blank'><AstroLogo className='inline' />Astro</a></span>}
           {rss && <a href={url('rss/feed.xml')} target='_blank' className='whitespace-nowrap'><IconRss className='inline align-[-3px] mr-1' />RSS订阅</a>}
           {sitemap && <a href={url('sitemap-index.xml')} target='_blank' className='whitespace-nowrap'><IconSitemap className='inline align-[-3px] mr-1' />站点地图</a>}
         </div>
