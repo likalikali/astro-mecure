@@ -6,13 +6,13 @@
 
 ## 关键域名纠错
 
-核对公开站点发现 `suborbit.net` 是原主题作者“银河渡舟”的博客，不是本站。原 CMS 与“关于”页的明确自有域名为 `blog.anriri.pp.ua`。已修正 Astro 的 `site`、文章作者头像绝对地址、管理后台和项目文档，避免生产构建的 canonical、RSS、sitemap 指向原作者站点。
+核对公开站点发现 `suborbit.net` 是原主题作者“银河渡舟”的博客，不是本站。原 CMS 与“关于”页的明确自有域名为 `blog.anriri.pp.ua`。已修正 Astro 的 `site`、文章作者头像资源、管理后台和项目文档，避免生产构建的 canonical、RSS、sitemap 指向原作者站点。
 
 ## 已处理的问题
 
 | 级别 | 问题 | 处理 |
 | --- | --- | --- |
-| 高 | `astro.config.ts` 的 `site` 与文章作者头像原来指向原作者域名 | 更正为站点配置中已有的 `blog.anriri.pp.ua`，上线前需核对实际部署域名 |
+| 高 | `astro.config.ts` 的 `site` 与文章作者头像原来指向原作者域名 | 将 `site` 更正为现有记录中的 `blog.anriri.pp.ua`；作者头像改为打包本地图片，避免请求原作者站点。上线前仍需核对实际部署域名 |
 | 高 | 评论指向原作者的 `izmttk/izmttk.github.io` Giscus，访客留言可能发到错误仓库 | 在 `src/config.ts` 中关闭评论，待本站自己的 Discussions 与分类 ID 配齐后启用 |
 | 高 | 搜索使用旧 Algolia 应用和 `wider` 索引 | 移除过期凭据，隐藏搜索按钮，避免查询发送到第三方索引 |
 | 高 | 本地 CMS 把提交说明拼进 Shell 命令，允许特殊字符造成命令执行 | Git commit 改用 `execFile` 和参数列表；保留固定的 Git 命令 |

@@ -1,5 +1,6 @@
 import type { Post } from '@/types';
 import config from '@/config';
+import defaultAvatar from '@/assets/avatar-sakura.webp';
 import { type CollectionEntry, getCollection, getEntry } from 'astro:content';
 
 // import { slug } from 'github-slugger';
@@ -56,7 +57,12 @@ async function getPosts(): Promise<Post[]> {
   
   cache = await Promise.all(posts.map(async post => {
     const { Content, headings, remarkPluginFrontmatter } = await post.render();
-    const author = (await getEntry(post.data.author)).data ?? {name: config.author};
+    const authorData = (await getEntry(post.data.author)).data ?? { name: config.author };
+    // Bundle our own author avatar instead of fetching another website at build time.
+    const author = {
+      ...authorData,
+      ...(post.data.author.id === 'default' ? { avatar: defaultAvatar } : {}),
+    };
     const date = post.data.date ?? getFileCreateTime(getPostPath(post.id));
     const updateDate = post.data.updateDate ?? getFileUpdateTime(getPostPath(post.id));
     const raw = remarkPluginFrontmatter.raw ?? '';
