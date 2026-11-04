@@ -6,6 +6,7 @@ import DateTime from '../DateTime';
 export interface ArticleLicenseProps extends HTMLAttributes<'div'> {
   url: string;
   title: string;
+  createdDate: Date;
   date: Date;
   updateDate: Date;
   author: string;
@@ -17,6 +18,7 @@ export type Props = ArticleLicenseProps;
 const {
   url,
   title,
+  createdDate,
   date,
   updateDate,
   author,
@@ -36,18 +38,22 @@ const {
     <p class="text-sm opacity-60">
       <a href={url} target="_blank">{url}</a>
     </p>
-    <div class="flex space-x-4">
+    <div class="flex flex-wrap gap-4">
       <div class="text-sm">
         <h6 class="mb-1">作者</h6>
         <p>{author}</p>
       </div>
       <div class="text-sm">
-        <h6 class="mb-1">发布于</h6>
-        <p><DateTime date={date} /></p>
+        <h6 class="mb-1">创建时间</h6>
+        <p><DateTime date={createdDate} showTime /></p>
       </div>
       <div class="text-sm">
-        <h6 class="mb-1">编辑于</h6>
-        <p><DateTime date={updateDate} /></p>
+        <h6 class="mb-1">首次上传</h6>
+        <p><DateTime date={date} showTime /></p>
+      </div>
+      <div class="text-sm">
+        <h6 class="mb-1">最后修改</h6>
+        <p><DateTime date={updateDate} showTime /></p>
       </div>
       <div class="text-sm">
         <h6 class="mb-1">许可协议</h6>

@@ -55,6 +55,7 @@ const protectedContent = post.access?.encryptedContent;
 <PostLayout post={post} prev={prev} next={next}>
   <div class="not-prose -mx-4 -mt-4 md:-mx-8 md:-mt-8 mb-3 md:mb-6" slot="header">
     <PostMeta 
+      createdDate={post.createdDate}
       date={post.date}
       updateDate={post.updateDate}
       draft={post.draft}
@@ -91,6 +92,7 @@ const protectedContent = post.access?.encryptedContent;
         url={decodeURI(Astro.url.href)}
         title={post.title}
         author={post.author.name}
+        createdDate={post.createdDate}
         date={post.date}
         updateDate={post.updateDate}
         licenseName={licenseConfig.licenseName}

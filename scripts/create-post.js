@@ -9,6 +9,8 @@ const generateFrontmatter = ({
   image,
   draft,
   date,
+  createdDate,
+  updateDate,
   accessPassword,
   accessHint,
   accessExcerpt
@@ -18,6 +20,8 @@ const generateFrontmatter = ({
   if (image) frontmatter += `image: ${image}\n`;
   if (draft) frontmatter += `draft: ${draft}\n`;
   if (date) frontmatter += `date: ${date}\n`;
+  if (createdDate) frontmatter += `createdDate: ${createdDate}\n`;
+  if (updateDate) frontmatter += `updateDate: ${updateDate}\n`;
   if (accessPassword) {
     frontmatter += `access:\n  password: ${JSON.stringify(accessPassword)}\n`;
     if (accessHint) frontmatter += `  hint: ${JSON.stringify(accessHint)}\n`;
@@ -31,12 +35,14 @@ const generateMarkdownTemplate = ({
   image,
   draft,
   date,
+  createdDate,
+  updateDate,
   accessPassword,
   accessHint,
   accessExcerpt
 }) => (
 `---
-${generateFrontmatter({ title, image, draft, date, accessPassword, accessHint, accessExcerpt })}
+${generateFrontmatter({ title, image, draft, date, createdDate, updateDate, accessPassword, accessHint, accessExcerpt })}
 ---
 
 ## Title
@@ -121,7 +127,9 @@ async function main() {
     title: response.title,
     image: response.image,
     draft: response.draft,
-    date: createDate.toISOString(),
+    date: response.draft ? undefined : createDate.toISOString(),
+    createdDate: createDate.toISOString(),
+    updateDate: createDate.toISOString(),
     accessPassword: response.accessPassword,
     accessHint: response.accessHint,
     accessExcerpt: response.accessExcerpt,

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Anriri Blog Studio · 可视化文章发布管理系统</title>
+  <title>团子 Blog Studio · 可视化文章发布管理系统</title>
   <style>
     :root {
       --bg-app: #f4f6fb;
@@ -843,7 +843,7 @@
     <div class="brand">
       <div class="brand-logo">A</div>
       <div class="brand-title">
-        <span>Anriri Blog Studio</span>
+        <span>团子 Blog Studio</span>
         <a href="https://blog.anriri.pp.ua" target="_blank" class="site-pill" title="打开线上博客">
           🌐 blog.anriri.pp.ua ↗
         </a>
@@ -1030,10 +1030,23 @@
 
           <div class="field col-3">
             <label class="field-label">
-              <span>发布时间 (date)</span>
+              <span>首次上传时间</span>
               <a href="javascript:void(0)" onclick="setNowDate('metaDate')" style="color:var(--primary); text-decoration:none;">设为当前</a>
             </label>
-            <input type="text" id="metaDate" class="input" placeholder="YYYY-MM-DD 或 ISO 时间" oninput="markUnsaved()" />
+            <input type="text" id="metaDate" class="input" aria-label="首次上传时间" placeholder="留空：首次保存为非草稿时记录" oninput="markUnsaved()" />
+          </div>
+
+          <div class="field col-3">
+            <label class="field-label" for="metaCreatedDate">
+              <span>创建时间</span>
+              <a href="javascript:void(0)" onclick="setNowDate('metaCreatedDate')" style="color:var(--primary); text-decoration:none;">设为当前</a>
+            </label>
+            <input type="text" id="metaCreatedDate" class="input" placeholder="YYYY-MM-DD HH:mm:ss（北京时间）" oninput="markUnsaved()" />
+          </div>
+
+          <div class="field col-3">
+            <label class="field-label" for="metaUpdateDate"><span>最后修改时间</span></label>
+            <input type="text" id="metaUpdateDate" class="input" placeholder="保存时自动更新" readonly />
           </div>
 
           <div class="field col-3">
@@ -1329,7 +1342,9 @@
       document.getElementById('metaCategoryInput').value = (post.category || []).join(' / ');
       document.getElementById('metaImage').value = post.image || '';
       document.getElementById('metaCardVariant').value = post.cardVariant || 'blur';
-      document.getElementById('metaDate').value = post.date || post.dateISO?.slice(0, 10) || '';
+      document.getElementById('metaDate').value = formatDateInput(post.date);
+      document.getElementById('metaCreatedDate').value = formatDateInput(post.createdDate);
+      document.getElementById('metaUpdateDate').value = formatDateInput(post.updateDate);
       document.getElementById('metaDraft').checked = Boolean(post.draft);
 
       selectedTags = Array.isArray(post.tags) ? [...post.tags] : [];
@@ -1369,7 +1384,9 @@
       document.getElementById('metaCategoryInput').value = '';
       document.getElementById('metaImage').value = '';
       document.getElementById('metaCardVariant').value = 'blur';
-      document.getElementById('metaDate').value = nowISO;
+      document.getElementById('metaDate').value = '';
+      document.getElementById('metaCreatedDate').value = formatDateInput(nowISO);
+      document.getElementById('metaUpdateDate').value = '';
       document.getElementById('metaDraft').checked = false;
 
       document.getElementById('metaProtected').checked = false;
@@ -1432,8 +1449,15 @@
       document.getElementById('accessFieldsBox').style.display = checked ? 'grid' : 'none';
     }
 
+    function formatDateInput(value) {
+      if (!value) return '';
+      const date = new Date(value);
+      if (!Number.isFinite(date.getTime())) return String(value);
+      return new Date(date.getTime() + 8 * 60 * 60 * 1000).toISOString().replace('Z', '+08:00');
+    }
+
     function setNowDate(inputId) {
-      document.getElementById(inputId).value = new Date().toISOString();
+      document.getElementById(inputId).value = formatDateInput(new Date().toISOString());
       markUnsaved();
     }
 
@@ -1669,8 +1693,8 @@
         ext,
         meta: {
           title: title || slug,
-          date: date || new Date().toISOString(),
-          updateDate: currentPostId ? new Date().toISOString() : undefined,
+          date,
+          createdDate: document.getElementById('metaCreatedDate').value.trim(),
           draft,
           tags: selectedTags,
           category,
@@ -1701,6 +1725,9 @@
           return null;
         }
         currentPostId = data.post.id;
+        document.getElementById('metaDate').value = formatDateInput(data.post.date);
+        document.getElementById('metaCreatedDate').value = formatDateInput(data.post.createdDate);
+        document.getElementById('metaUpdateDate').value = formatDateInput(data.post.updateDate);
         document.getElementById('btnDeletePost').style.display = 'inline-flex';
         markUnsaved(false);
         await loadAllPosts();
@@ -1771,7 +1798,9 @@
       document.getElementById('metaCategoryInput').value = (data.meta.category || []).join(' / ');
       document.getElementById('metaImage').value = data.meta.image || '';
       document.getElementById('metaCardVariant').value = data.meta.cardVariant || 'blur';
-      document.getElementById('metaDate').value = data.meta.date || new Date().toISOString();
+      document.getElementById('metaDate').value = formatDateInput(data.meta.date);
+      document.getElementById('metaCreatedDate').value = formatDateInput(data.meta.createdDate);
+      document.getElementById('metaUpdateDate').value = formatDateInput(data.meta.updateDate);
       document.getElementById('metaDraft').checked = Boolean(data.meta.draft);
 
       selectedTags = Array.isArray(data.meta.tags) ? [...data.meta.tags] : [];

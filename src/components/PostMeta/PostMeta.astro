@@ -10,6 +10,7 @@ import PostDate from './PostDate';
 import { twMerge } from "tailwind-merge";
 
 interface PostMetaProps extends HTMLAttributes<'div'> {
+  createdDate: Date;
   date: Date;
   updateDate: Date;
   draft: boolean;
@@ -21,6 +22,7 @@ export type Props = PostMetaProps;
 
 const {
   class: className,
+  createdDate,
   date,
   updateDate,
   draft,
@@ -36,10 +38,10 @@ const {
   className
 )} {...rest}>
   {date && <PostDate
-    className='flex items-center bg-gray-400/20 text-gray-600 dark:bg-gray-600/40 dark:text-gray-300 py-1 px-1.5 rounded-md'
+    className='w-full text-gray-600 dark:text-gray-300 pb-2'
+    createdDate={createdDate}
     date={date}
     updateDate={updateDate}
-    client:load
   />}
   {readingTime && <div class='hidden md:flex items-center bg-gray-400/20 text-gray-600 dark:bg-gray-600/40 dark:text-gray-300 py-1 px-1.5 rounded-md'>
     <IconTimeFill className='inline mr-1' />约{Math.ceil(readingTime ?? 0)}分钟

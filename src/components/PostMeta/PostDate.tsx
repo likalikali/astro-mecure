@@ -1,28 +1,32 @@
-import IconCalendarFill from '~icons/mingcute/calendar-fill';
-import IconEdit from '~icons/mingcute/edit-fill';
-
 import DateTime from '@/components/DateTime';
-import Tooltip from "@/components/Tooltip";
+
 export interface PostMetaProps extends React.ComponentPropsWithoutRef<'div'> {
+  createdDate: Date;
   date: Date;
   updateDate: Date;
 }
 export default function PostMeta({
+  createdDate,
   date,
   updateDate,
   ...rest
 }: PostMetaProps) {
+  const dates = [
+    { label: '创建时间', value: createdDate },
+    { label: '首次上传', value: date },
+    { label: '最后修改', value: updateDate },
+  ];
   return (
-    /* make sure that prerendered html isn't afftected by timezone */
-    date && <Tooltip content={
-      <div>
-        {date && <div><IconCalendarFill className='inline mr-1' />发布于：<DateTime date={date} /></div>}
-        {updateDate && <div><IconEdit className='inline mr-1' />修改于：<DateTime date={updateDate} /></div>}
-      </div>
-    }>
-      <div {...rest}>
-        <IconCalendarFill className='inline mr-1' /><DateTime date={date} />
-      </div>
-    </Tooltip>
-  )
+    <div {...rest}>
+      <dl className="flex flex-wrap gap-x-5 gap-y-2">
+        {dates.map(({ label, value }) => (
+          <div key={label}>
+            <dt className="mb-1 opacity-70">{label}</dt>
+            <dd><DateTime date={value} showTime /></dd>
+          </div>
+        ))}
+      </dl>
+      <span className="mt-2 block text-xs opacity-60">北京时间（UTC+8）</span>
+    </div>
+  );
 }

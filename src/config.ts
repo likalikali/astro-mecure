@@ -3,9 +3,9 @@ import { getYear } from 'date-fns';
 import { url } from '@/utils/url';
 
 const config: Config = {
-  title: 'Anriri',
+  title: '团子',
   description: '大河の一滴。',
-  author: 'Anriri',
+  author: '团子',
   favicon: url('favicon-white-mochi.png'),
   navbar: {
     logo: import('@/custom/NavLogo.astro'),
@@ -46,14 +46,14 @@ const config: Config = {
   },
   hero: {
     background: import('src/assets/hero-bg.jpg'),
-    description: '欢迎来到Anriri的记事簿，看看最近我在折腾啥吧。',
+    description: '欢迎来到团子的记事簿，看看最近我在折腾啥吧。',
     title: import('@/custom/HeroLogo.astro'),
   },
   sidebar: {
     widgets: [
       {
         name: 'profile',
-        author: 'Anriri',
+        author: '团子',
         description: '大河の一滴。',
         avatar: import('src/assets/avatar-sakura.webp'),
         background: import('src/assets/profile-bg.png'),
@@ -127,7 +127,7 @@ const config: Config = {
       { label: 'Github', url: 'https://github.com/likalikali'},
     ],
     declarations: [
-      `Copyright © ${getYear(new Date())} Anriri All Rights Reserved.`,
+      `Copyright © ${getYear(new Date())} 团子 All Rights Reserved.`,
     ],
     generator: false,
     rss: true,

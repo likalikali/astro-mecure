@@ -1,4 +1,4 @@
-# Anriri 记事簿
+# 团子 记事簿
 
 个人博客：[blog.anriri.pp.ua](https://blog.anriri.pp.ua/)。使用 [Astro](https://astro.build/)、React、TypeScript 与 Tailwind CSS 搭建，并在开源主题 [astro-mecure](https://github.com/izmttk/astro-mecure) 上进行个性化修改。
 
@@ -29,6 +29,20 @@ npm run preview
 - `src/pages/memoirs/`：故乡、东北亚、江南三个时期的待写页面，可直接补充正文
 
 ## 本地文章管理
+
+### 文章的三个时间
+
+文章属性支持三个独立时间，文章页统一按北京时间（UTC+8）显示到秒：
+
+```yaml
+createdDate: 2026-11-01T09:00:00+08:00 # 创建时间
+date: 2026-11-03T10:00:00+08:00       # 首次上传时间，列表/归档按此排序
+updateDate: 2026-11-04T11:00:00+08:00 # 最后修改时间
+```
+
+编辑器可以设置创建时间和首次上传时间；未填首次上传时间的草稿会保持留空，在首次保存为非草稿时记录。之后保存文章会保留前两项，并自动更新最后修改时间。编辑器中不带时区的日期按北京时间解释，写入文件时使用带时区的 ISO 时间；直接编辑 Markdown 时，请显式填写 `+08:00`，并在修改正文后更新 `updateDate`。首次上传时间是可设置的文章元数据，不代表 GitHub/Vercel 的实际部署完成时间。
+
+旧文章没有 `createdDate` 时，沿用原 `date`；没有显式日期时仍兼容原有 Git 历史回退逻辑。示例文章位于 `src/content/blog/three-dates-test.md`，其中三个时间为演示数据。
 
 ```bash
 npm run studio

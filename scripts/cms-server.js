@@ -7,6 +7,7 @@ import { exec, execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import matter from 'gray-matter';
 import { validateCmsImage } from './cms-image-validation.js';
+import { resolvePostDates } from './post-dates.js';
 
 const execAsync = promisify(exec);
 const execFileAsync = promisify(execFile);
@@ -104,8 +105,9 @@ function buildFrontmatter(meta) {
   const title = (meta.title || '未命名文章').trim();
   lines.push(`title: ${formatYamlString(title)}`);
 
-  const dateStr = formatDateForYaml(meta.date) || new Date().toISOString();
-  lines.push(`date: ${dateStr}`);
+  lines.push(`createdDate: ${formatDateForYaml(meta.createdDate)}`);
+  const dateStr = formatDateForYaml(meta.date);
+  if (dateStr) lines.push(`date: ${dateStr}`);
 
   const updateDateStr = formatDateForYaml(meta.updateDate);
   if (updateDateStr) {
@@ -265,6 +267,7 @@ async function parsePostFile(fullPath, relId, isFolder, assets = []) {
       isFolder,
       ext,
       title: data.title || slug,
+      createdDate: normalizeDateForInput(data.createdDate ?? data.date),
       date: normalizeDateForInput(data.date),
       dateISO: normalizeDateToISO(data.date, stat.birthtimeMs || stat.mtimeMs),
       updateDate: normalizeDateForInput(data.updateDate),
@@ -498,6 +501,19 @@ const server = http.createServer(async (req, res) => {
         }
       }
 
+      // Resolve dates before any rename/write, preserving the first upload on edits.
+      let previousMeta = {};
+      if (originalId) {
+        const previousPath = resolveBlogPath(originalId);
+        previousMeta = matter(await fs.readFile(previousPath, 'utf-8')).data;
+      }
+      let savedMeta;
+      try {
+        savedMeta = { ...meta, ...resolvePostDates(meta, previousMeta) };
+      } catch (error) {
+        return sendJson(res, 400, { error: error.message });
+      }
+
       // Ensure directory exists if folder mode
       if (isFolder) {
         await fs.mkdir(path.dirname(targetFullPath), { recursive: true });
@@ -532,7 +548,7 @@ const server = http.createServer(async (req, res) => {
         }
       }
 
-      const frontmatter = buildFrontmatter(meta);
+      const frontmatter = buildFrontmatter(savedMeta);
       const normalizedBody = String(content || '').replace(/\r\n/g, '\n');
       const finalFileContent = `${frontmatter}\n\n${normalizedBody.trimStart()}${normalizedBody.endsWith('\n') ? '' : '\n'}`;
 
@@ -674,7 +690,8 @@ const server = http.createServer(async (req, res) => {
         ext,
         meta: {
           title: inferredTitle,
-          date: normalizeDateForInput(parsedData.date) || new Date().toISOString(),
+          createdDate: normalizeDateForInput(parsedData.createdDate ?? parsedData.date),
+          date: normalizeDateForInput(parsedData.date),
           updateDate: normalizeDateForInput(parsedData.updateDate),
           draft: Boolean(parsedData.draft),
           tags: Array.isArray(parsedData.tags) ? parsedData.tags.map(String) : [],
@@ -795,7 +812,7 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(PORT, '127.0.0.1', () => {
   console.log(`\n========================================================`);
-  console.log(`  🚀 Anriri Blog Studio 可视化文章发布系统已启动`);
+  console.log(`  🚀 团子 Blog Studio 可视化文章发布系统已启动`);
   console.log(`  👉 管理后台地址: http://localhost:${PORT}`);
   console.log(`  🌐 线上博客地址: https://blog.anriri.pp.ua`);
   console.log(`========================================================\n`);

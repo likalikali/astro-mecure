@@ -7,14 +7,15 @@
     "dev": "astro dev",
     "prod": "astro build && astro preview",
     "start": "astro dev",
-    "build": "npm run test:security && astro build",
+    "build": "npm run test:security && npm run test:dates && astro build",
     "preview": "astro preview",
     "astro": "astro",
     "create-post": "node scripts/create-post.js",
     "create-component": "node scripts/create-component.js",
     "cms": "node scripts/cms-server.js",
     "studio": "node scripts/cms-server.js",
-    "test:security": "node --test scripts/tests/cms-image-validation.test.mjs"
+    "test:security": "node --test scripts/tests/cms-image-validation.test.mjs",
+    "test:dates": "node --test scripts/tests/post-dates.test.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.3.4",

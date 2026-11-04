@@ -39,6 +39,7 @@ export interface Post {
   slug: string;
   url: string;
   title: string;
+  createdDate: Date;
   date: Date;
   updateDate: Date;
   draft: boolean;

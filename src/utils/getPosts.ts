@@ -81,6 +81,7 @@ async function getPosts(): Promise<Post[]> {
       url: postUrl(post.slug),
       author: author,
       image: post.data.image,
+      createdDate: post.data.createdDate ?? date,
       date: post.data.date ?? date,
       updateDate: post.data.updateDate ?? updateDate,
       draft: post.data.draft,

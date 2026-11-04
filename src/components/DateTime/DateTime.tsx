@@ -1,16 +1,18 @@
-import { format } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
 export interface DateTimeProps {
-  date: Date
+  date: Date;
+  showTime?: boolean;
 }
 
 export default function DateTime({
-  date
+  date,
+  showTime = false,
 }: DateTimeProps) {
-  const dateString = format(date, 'PPP', {
-    locale: zhCN
-  })
+  const dateString = new Intl.DateTimeFormat('zh-CN', {
+    timeZone: 'Asia/Shanghai',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    ...(showTime ? { hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' as const } : {}),
+  }).format(date);
   return (
-    <>{dateString}</>
+    <time dateTime={date.toISOString()} title="北京时间（UTC+8）">{dateString}</time>
   );
 }
