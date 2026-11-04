@@ -72,7 +72,7 @@ const config: Config = {
         name: 'profile',
         author: 'Anriri',
         description: '大河の一滴。',
-        avatar: import('src/assets/avatar.png'),
+        avatar: import('src/assets/avatar-sakura.webp'),
         background: import('src/assets/profile-bg.jpg'),
         socialIcons: [
           {
