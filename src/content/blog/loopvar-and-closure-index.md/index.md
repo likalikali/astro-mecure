@@ -5,7 +5,6 @@ date: 2026-05-27
 updateDate: 2026-11-04T07:20:12.019Z
 tags: [编程, Go, JavaScript, Python, C++]
 category: [编程语言]
-image: ./cover.jpg
 ---
 
 ## 起因
