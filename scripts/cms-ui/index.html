@@ -1492,13 +1492,19 @@
       const tagSug = document.getElementById('tagSuggestions');
       tagSug.innerHTML = allTags.map(t => {
         const isSel = selectedTags.includes(t.name);
-        return `<span class="suggest-pill ${isSel ? 'selected' : ''}" onclick="toggleSuggestedTag('${t.name.replace(/'/g, "\\'")}')">#${escapeHtml(t.name)} (${t.count})</span>`;
+        return `<button type="button" class="suggest-pill ${isSel ? 'selected' : ''}" data-tag="${escapeHtml(t.name)}">#${escapeHtml(t.name)} (${t.count})</button>`;
       }).join('');
+      tagSug.querySelectorAll('[data-tag]').forEach(button => {
+        button.addEventListener('click', () => toggleSuggestedTag(button.dataset.tag || ''));
+      });
 
       const catSug = document.getElementById('categorySuggestions');
-      catSug.innerHTML = allCategories.map(c => {
-        return `<span class="suggest-pill cat-pill" data-cat="${escapeHtml(c.label)}" onclick="selectSuggestedCategory('${c.label.replace(/'/g, "\\'")}')">📂 ${escapeHtml(c.label)}</span>`;
-      }).join('');
+      catSug.innerHTML = allCategories.map(c =>
+        `<button type="button" class="suggest-pill cat-pill" data-cat="${escapeHtml(c.label)}">📂 ${escapeHtml(c.label)}</button>`
+      ).join('');
+      catSug.querySelectorAll('[data-cat]').forEach(button => {
+        button.addEventListener('click', () => selectSuggestedCategory(button.dataset.cat || ''));
+      });
       highlightSelectedCategory();
     }
 
@@ -2004,17 +2010,32 @@
         return `<div class="admonition-preview"><strong>${type.toUpperCase()} ${title || ''}</strong><div>${cleanBody}</div></div>`;
       });
 
+      // Reject script/data URLs in the local Markdown preview, including links.
+      const safePreviewUrl = value => {
+        const target = String(value).trim().replace(/&amp;/g, '&');
+        const lower = target.toLowerCase();
+        const allowed =
+          lower.startsWith('https://') ||
+          lower.startsWith('http://') ||
+          lower.startsWith('mailto:') ||
+          (target.startsWith('/') && !target.startsWith('//')) ||
+          target.startsWith('./') ||
+          target.startsWith('#');
+        return allowed ? escapeHtml(target) : '#';
+      };
+
       // Images (resolve ./xxx.jpg to /api/asset)
       html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, src) => {
         let realSrc = src.trim();
         if (realSrc.startsWith('./') && slug) {
           realSrc = `/api/asset?slug=${encodeURIComponent(slug)}&file=${encodeURIComponent(realSrc.slice(2))}`;
         }
-        return `<img src="${realSrc}" alt="${alt}" />`;
+        return `<img src="${safePreviewUrl(realSrc)}" alt="${alt}" />`;
       });
 
       // Links
-      html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color:var(--primary);">$1</a>');
+      html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g,
+        (_, label, target) => `<a href="${safePreviewUrl(target)}" target="_blank" rel="noopener noreferrer" style="color:var(--primary);">${label}</a>`);
 
       // Headings
       html = html.replace(/^####\s+(.+)$/gm, '<h4>$1</h4>');
@@ -2113,7 +2134,8 @@
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
   </script>
 </body>

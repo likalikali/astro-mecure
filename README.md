@@ -21,7 +21,7 @@ npm run preview
 - `src/config.ts`：站点标题、导航、作者与页面设置
 - `src/content/authors/default.json`：文章作者信息
 - `src/content/blog/`：博客内容
-- `src/content/friends/`：友情链接
+- `src/content/friends/`：友情链接（原模板的友链条目已移除，可自行添加）
 - `public/favicon.svg` 和 `public/favicon.ico`：标签页图标
 - `src/assets/avatar-sakura.webp`：侧边栏头像
 
