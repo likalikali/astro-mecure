@@ -14,6 +14,31 @@ export interface Props {
 
 export const getStaticPaths = (async ({ paginate }) => {
   const allPosts = (await getPosts()).filter(post => !post.draft).sort((a, b) => compareDesc(a.date, b.date));
+  // Keep / available even when every inherited article is an unpublished draft.
+  if (allPosts.length === 0) {
+    return [{
+      params: { page: undefined },
+      props: {
+        page: {
+          data: [],
+          start: 0,
+          end: 0,
+          size: 0,
+          total: 0,
+          currentPage: 1,
+          lastPage: 1,
+          url: {
+            current: '/',
+            first: undefined,
+            last: undefined,
+            next: undefined,
+            prev: undefined,
+          },
+        } as AstroPage<Omit<Post, 'Content'>>,
+      },
+    }];
+  }
+
   return paginate(allPosts, {
     pageSize: config.pagination === false ? Infinity : config.pagination?.pageSize,
   }).map(item => ({
@@ -32,14 +57,23 @@ const pageConfig: Page = {
   title: config.title,
   description: config.description,
   posts: page.data,
-  paginator: createPaginator(page, {
-    includesFirstPageNumber: true,
-  })
+  ...(page.total > 0
+    ? { paginator: createPaginator(page, { includesFirstPageNumber: true }) }
+    : {})
 }
 ---
 
 <PageLayout page={pageConfig}>
   <div class='flex flex-col gap-y-4 md:gap-y-6'>
+    {page.data.length === 0 && (
+      <section class="plate-bg border-highlight rounded-2xl p-8 text-center md:p-12">
+        <img src="/favicon.svg" width="88" height="88" class="mx-auto mb-5" alt="樱花大福" />
+        <h2 class="mb-3 text-xl font-semibold">欢迎来到 Anriri 的记事簿</h2>
+        <p class="text-sm leading-7 text-gray-600 dark:text-gray-300">
+          这里正在整理文章。新的记录会陆续出现在这里。
+        </p>
+      </section>
+    )}
     {
       page.data.map((post, index) => {
         return <PostCard

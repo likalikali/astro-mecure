@@ -21,6 +21,9 @@ const page: Page = {
 
 <PageLayout page={page} hasSidebar={false}>
   <div class="space-y-4">
+    {allPosts.length === 0 && (
+      <p class="plate-bg border-highlight rounded-xl p-8 text-center text-gray-600 dark:text-gray-300">还没有公开文章，归档会在发布后自动生成。</p>
+    )}
     {Object.keys(groupedByYear).sort((a, b) => Number(b) - Number(a)).map(year => {
       const posts = groupedByYear[year];
       const groupedByMonth = groupBy(posts, post => getMonth(post.date));
