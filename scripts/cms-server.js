@@ -33,7 +33,7 @@ const MIME_TYPES = {
   '.ico': 'image/x-icon',
 };
 
-const IMAGE_EXTS = new Set(['.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg', '.avif']);
+const IMAGE_EXTS = new Set(['.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg']);
 
 function sendJson(res, status, data) {
   res.writeHead(status, {
@@ -594,9 +594,9 @@ const server = http.createServer(async (req, res) => {
       if (!matches) {
         return sendJson(res, 400, { error: '无效的 Base64 图片格式' });
       }
-      const allowedImageMimeTypes = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/avif']);
+      const allowedImageMimeTypes = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif']);
       if (!allowedImageMimeTypes.has(matches[1].toLowerCase())) {
-        return sendJson(res, 400, { error: '仅允许上传 PNG / JPEG / WebP / GIF / AVIF 图片' });
+        return sendJson(res, 400, { error: '仅允许上传 PNG / JPEG / WebP / GIF 图片' });
       }
       const buffer = Buffer.from(matches[2], 'base64');
       const safeFile = path.basename(rawFilename || `img-${Date.now()}.png`).replace(/\s+/g, '-');

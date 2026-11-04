@@ -79,3 +79,11 @@ npm run studio
 - 2026-11-04：第二轮清理（独立搜索 / 大福 404）提交 `3411aefa` 对应的 GitHub Vercel 检查结果为 success。
 - 原创友链清空与 CMS 建议/预览增强属于后续提交，需要再次等待对应 Vercel 构建通过。
 - 由于当前工作环境无法直接获取远端 npm 依赖完整安装包，不声称执行过本地 `npm ci`、`npm run build` 或 `npm audit`。构建状态以 Vercel 为准。
+
+## 依赖安全风险补充（高优先级）
+
+已读取 `package-lock.json`，确认实际锁定：`astro@4.15.8`、`sharp@0.33.5`、`@docsearch/react@3.5.2`。请勿仅依据 package.json 的范围判断已安装版本。
+
+截至 2026-11-04，Astro 上游公开安全公告中包括 [GHSA-26w7-cxv4-gfx2](https://github.com/withastro/astro/security/advisories/GHSA-26w7-cxv4-gfx2)：不可信 AVIF 图片优化可能触发 Sharp/libheif 相关远程代码执行，受影响 Astro 版本小于 7.2.8，修复要求 Sharp 0.35.4。是否可在本项目触发还取决于具体图片输入和构建方式；不能仅凭包版本断定站点已经遭到攻击。
+
+**已采取的临时缓解**：本地 CMS 暂停新上传 AVIF（仍支持 PNG / JPEG / WebP / GIF），减少不可信 AVIF 输入。**根本解决**：规划 Astro 与官方集成的受测升级、更新 lockfile、执行 `npm audit`，在 Vercel 预览环境回归文章、Markdown、图片、RSS、搜索、CMS 构建后发布。由于本轮无法运行完整本地依赖升级验证，未擅自升级主版本。
