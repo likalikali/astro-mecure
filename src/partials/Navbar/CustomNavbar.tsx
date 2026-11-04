@@ -185,7 +185,7 @@ export default function CustomNavbar({
           </Navbar.Content>
         )}
         <Navbar.Content className='md:ml-3 space-x-2'>
-          {hasSearchToggle && isMd && <SearchToggle />}
+          {hasSearchToggle && <SearchToggle />}
           {hasThemeToggle && isMd && <ThemeToggle open={map['theme'] ?? false} onOpenChange={onThemeMenuOpenChange} />}
           {!isMd && <SideToggle />}
         </Navbar.Content>

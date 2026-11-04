@@ -41,7 +41,7 @@ const config: Config = {
         icon: 'tabler:info-circle'
       },
     ],
-    hasSearchToggle: false,
+    hasSearchToggle: true,
     hasThemeToggle: true,
   },
   hero: {

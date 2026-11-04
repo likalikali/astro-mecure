@@ -163,12 +163,6 @@ export type ArticleConfig = {
   }
 };
 
-export type AlgoliaConfig = {
-  appId: string;
-  apiKey: string;
-  indexName: string;
-}
-
 export interface Config {
   title: string;
   description: string;
@@ -181,5 +175,4 @@ export interface Config {
   comment?: CommentConfig | false;
   footer?: FooterConfig | false;
   article?: ArticleConfig;
-  algolia?: AlgoliaConfig;
 }

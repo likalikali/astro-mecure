@@ -6,7 +6,7 @@ import { searchModelOpen as searchModelOpenAtom } from '@/store/atoms';
 import useUncontrolled from '@/hooks/useUncontrolled';
 
 
-export interface DearchToggleProps extends React.ComponentPropsWithoutRef<'button'> {
+export interface SearchToggleProps extends React.ComponentPropsWithoutRef<'button'> {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
@@ -16,7 +16,7 @@ export default function SearchToggle({
   open,
   onOpenChange,
   ...rest
-}: DearchToggleProps) {
+}: SearchToggleProps) {
   const [isOpen, setIsOpen] = useUncontrolled({
     value: open,
     defaultValue: false,
