@@ -53,7 +53,7 @@ npm run studio
 
 ## 服务配置提醒
 
-原模板的 **Giscus** 评论仓库属于上游，评论暂时关闭，待配置本人有权限的 GitHub Discussions 后再启用。原来的 **Algolia** 远程搜索已替换为本站构建的本地文章索引（`/search-index.json`），不再向上游搜索服务发送关键词。明确的五篇旧主题示例文章已从当前工作树删除（Git 历史仍可恢复）；待核实的《循环变量与闭包》暂时作为草稿保留。
+**Giscus** 评论已连接本站仓库 `likalikali/astro-mecure` 的 Announcements 分类；需要为该仓库安装 GitHub giscus App。关于页启用评论和侧边栏。原来的 **Algolia** 远程搜索已替换为本站构建的本地文章索引（`/search-index.json`），不再向上游搜索服务发送关键词。明确的五篇旧主题示例文章已从当前工作树删除（Git 历史仍可恢复）；待核实的《循环变量与闭包》暂时作为草稿保留。
 
 **关于加密文章**：当前功能的 `access.password` 仍写在文章 frontmatter 中。公开仓库中密码是可见的，所以不能将此功能当作真正保密的访问控制，也不要使用真实重要密码。
 

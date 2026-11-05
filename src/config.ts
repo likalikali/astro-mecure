@@ -115,8 +115,22 @@ const config: Config = {
       infoText: '转载或引用本文时请注明作者及出处，不得用于商业用途。',
     }
   },
-  // 未配置本站评论仓库前保持关闭，避免发送到原主题作者的仓库。
-  comment: false,
+  // 评论保存到本站仓库的 GitHub Discussions。
+  comment: {
+    provider: 'giscus',
+    options: {
+      repo: 'likalikali/astro-mecure',
+      repoId: 'R_kgDOSpW-bw',
+      category: 'Announcements',
+      categoryId: 'DIC_kwDOSpW-b84DKbqg',
+      mapping: 'pathname',
+      strict: '1',
+      reactionsEnabled: '1',
+      emitMetadata: '0',
+      inputPosition: 'top',
+      lang: 'zh-CN',
+    },
+  },
   footer: {
     links: [
       { label: '更新日志', url: url('changelog')},

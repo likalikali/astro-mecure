@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 
 export type Theme = 'light' | 'dark' | 'auto';
 
-export default function useTheme(defaultTheme: Theme = 'auto') {
+export default function useTheme(defaultTheme: Theme = 'dark') {
   const isMatchDark = useMedia('(prefers-color-scheme: dark)');
   const [value, setValue, remove] = useLocalStorage<Theme>('theme', defaultTheme);
   const [theme, setTheme] = useAtom(themeAtom);

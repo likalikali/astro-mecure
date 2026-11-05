@@ -41,7 +41,7 @@ import ProgressBar from "@/components/ProgressBar";
     {canonical && <link rel="canonical" href={canonical} />}
     <script is:inline>
       (function() {
-        const storedTheme = JSON.parse(window.localStorage.getItem('theme') ?? '"auto"');
+        const storedTheme = JSON.parse(window.localStorage.getItem('theme') ?? '"dark"');
         let presetTheme;
         if (storedTheme === 'auto') {
           presetTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -72,7 +72,7 @@ import ProgressBar from "@/components/ProgressBar";
 <script>
   // prevent flash when using view transitions in astro
   const setDarkMode = () => {
-    const storedTheme = JSON.parse(window.localStorage.getItem('theme') ?? '"auto"');
+    const storedTheme = JSON.parse(window.localStorage.getItem('theme') ?? '"dark"');
     let presetTheme;
     if (storedTheme === 'auto') {
       presetTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
