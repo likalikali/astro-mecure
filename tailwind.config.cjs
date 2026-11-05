@@ -27,8 +27,9 @@ module.exports = {
   darkMode: 'class',
   theme: {
     fontFamily: {
-      sans: ['Inter Variable', 'Inter', ...defaultTheme.fontFamily.sans],
-      mono: ['Fira Code Variable', 'Fira Code', ...defaultTheme.fontFamily.mono],
+      sans: ['Google Sans', 'KingHwa OldSong', ...defaultTheme.fontFamily.sans],
+      serif: ['Google Sans', 'KingHwa OldSong', ...defaultTheme.fontFamily.serif],
+      mono: ['Fira Code Variable', 'Fira Code', 'KingHwa OldSong', ...defaultTheme.fontFamily.mono],
     },
     extend: {
       colors: {

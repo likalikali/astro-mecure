@@ -27,6 +27,7 @@ npm run preview
 - `src/assets/memoirs/`：关于页的黄、白、绿团子原图
 - `src/components/MemoirEntrances.astro`：回忆录入口的时期名称、图片与链接
 - `src/pages/memoirs/`：故乡、东北亚、江南三个时期的待写页面，可直接补充正文
+- `public/fonts/` 与 `src/styles/fonts.css`：全站中文京华老宋体、英文 Google Sans 网页字体，字体来源和重新生成方式见 `public/fonts/SOURCES.md`
 
 ## 本地文章管理
 
