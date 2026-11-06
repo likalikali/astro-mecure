@@ -3,9 +3,13 @@ title: 你好，我是团子
 createdDate: 2026-11-01T01:00:00.000Z
 date: 2026-11-03T02:00:00.000Z
 updateDate: 2026-11-05T08:17:36.251Z
-tags: [博客记录]
-category: [站点日志]
+tags:
+  - 博客记录
+category:
+  - 站点日志
 cardVariant: plain
+draft: false
+author: default
 ---
 
 你好，我是**团子**。这是记事簿的一篇测试文章。
