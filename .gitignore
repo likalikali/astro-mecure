@@ -23,6 +23,9 @@ README.md
 # environment variables
 .env
 .env.production
+.env.*.local
+admin-credentials.local.txt
+.playwright-cli/
 
 # macOS-specific files
 .DS_*
