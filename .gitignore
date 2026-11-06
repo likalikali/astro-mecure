@@ -25,6 +25,8 @@ README.md
 .env.production
 .env.*.local
 admin-credentials.local.txt
+blogastro1.txt
+.vercel/
 .playwright-cli/
 
 # macOS-specific files
