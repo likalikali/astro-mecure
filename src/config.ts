@@ -46,7 +46,7 @@ const config: Config = {
   },
   hero: {
     background: import('src/assets/hero-bg.jpg'),
-    description: '欢迎来到团子的记事簿，看看最近我在折腾啥吧。',
+    description: '相逢即是缘，欢迎来到 团子のUtopia，我是团子。 这里是一处电波发射器。只为寻觅与我同频之人，希望填补我那冷清的世界。',
     title: import('@/custom/HeroLogo.astro'),
   },
   sidebar: {
