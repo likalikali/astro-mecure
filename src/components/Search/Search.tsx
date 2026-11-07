@@ -37,7 +37,7 @@ export default function Search() {
     inputRef.current?.focus();
     const controller = new AbortController();
     setStatus('loading');
-    fetch(url('search-index.json'), { signal: controller.signal, credentials: 'same-origin' })
+    fetch(url('search-index.json'), { signal: controller.signal, credentials: 'same-origin', cache: 'no-store' })
       .then(response => {
         if (!response.ok) throw new Error('Search index unavailable');
         return response.json() as Promise<SearchEntry[]>;

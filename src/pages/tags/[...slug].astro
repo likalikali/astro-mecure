@@ -11,21 +11,10 @@ export interface Props {
   tag: Tag;
 }
 
-export const getStaticPaths = (async () => {
-  const tags = await getTags();
-  return tags.map(tag => ({
-    params: {
-      slug: tag.slug,
-    },
-    props: {
-      tag: tag,
-    },
-  }))
-}) satisfies GetStaticPaths;
-
 const { slug } = Astro.params;
 const { tag: tagProp } = Astro.props;
 const tag = tagProp ?? (await getTags()).find(tag => tag.slug === slug);
+if (!tag) return new Response('页面不存在', {status:404});
 
 const allPosts = 
   (await getPosts())

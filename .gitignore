@@ -26,6 +26,7 @@ README.md
 .env.*.local
 admin-credentials.local.txt
 blogastro1.txt
+supabase-blog-key.txt
 .vercel/
 .playwright-cli/
 

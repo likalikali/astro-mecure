@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { scryptSync } from 'node:crypto';
 import matter from 'gray-matter';
 import { allowedPath, session, validSession, checkPassword, updateDocument, parseDocument } from '../cloud-admin-core.js';
-import handler from '../../api/admin.js';
+import handler from '../cloud-admin-handler.js';
 
 test('restrict edits to articles and selected text pages', () => {
   for (const path of ['src/content/blog/test.md','src/content/blog/中文/index.mdx','src/pages/about.mdx']) assert.ok(allowedPath(path));
@@ -47,30 +47,30 @@ async function request(method,op,body,headers={}) {
   await handler({method,url:'/api/admin?op='+op,body,headers},res);return res;
 }
 test('API fails closed, rejects cross-origin writes and unauthenticated reads',async()=>{
-  process.env.BLOG_SESSION_SECRET='s'.repeat(40);process.env.BLOG_ADMIN_PASSWORD_HASH='salt:hash';process.env.BLOG_GITHUB_TOKEN='test-only';
+  process.env.BLOG_SESSION_SECRET='s'.repeat(40);process.env.BLOG_ADMIN_PASSWORD_HASH='salt:hash';process.env.BLOG_DATABASE_URL='https://test.invalid';process.env.BLOG_DATABASE_SECRET='test-only';
   assert.equal((await request('GET','list')).statusCode,401);
   assert.equal((await request('POST','save',{}, {origin:'https://attacker.example','content-type':'application/json'})).statusCode,403);
-  delete process.env.BLOG_GITHUB_TOKEN;
+  delete process.env.BLOG_DATABASE_SECRET;
   assert.equal((await request('GET','list')).statusCode,503);
 });
-test('authenticated save uses file revision, preserves dates, and rejects stale edits',async()=>{
-  const secret='s'.repeat(40);process.env.BLOG_SESSION_SECRET=secret;process.env.BLOG_ADMIN_PASSWORD_HASH='salt:hash';process.env.BLOG_GITHUB_TOKEN='test-only';
+test('database writes compare revisions and preserve original upload dates',async()=>{
+  const secret='s'.repeat(40);process.env.BLOG_SESSION_SECRET=secret;process.env.BLOG_ADMIN_PASSWORD_HASH='salt:hash';process.env.BLOG_DATABASE_URL='https://test.invalid';process.env.BLOG_DATABASE_SECRET='test-only';
   const headers={origin:'https://blog.anriri.pp.ua','content-type':'application/json',cookie:'__Host-blog-admin='+session(secret)};
-  const originalFetch=globalThis.fetch; let writes=0;
+  const originalFetch=globalThis.fetch;let writes=0;
   const source='---\ntitle: Old\ncreatedDate: 2020-01-01\ndate: 2021-01-01\n---\nOld';
   globalThis.fetch=async(url,options)=>{
-    if(options.method==='PUT'){
-      writes++;const sent=JSON.parse(options.body);assert.equal(sent.sha,'a'.repeat(40));assert.equal(sent.branch,'main');
-      const saved=matter(Buffer.from(sent.content,'base64').toString('utf8'));
-      assert.equal(saved.data.date.toISOString(),'2021-01-01T00:00:00.000Z');assert.equal(saved.content.trim(),'Edited');
-      return {ok:true,json:async()=>({content:{sha:'b'.repeat(40)},commit:{sha:'c'.repeat(40)}})};
+    if(options.method==='PATCH'){
+      writes++;assert.ok(url.includes('version=eq.version-one'));
+      const saved=JSON.parse(options.body);assert.equal(saved.meta.date,'2021-01-01T00:00:00.000Z');
+      assert.equal(matter(saved.source).content.trim(),'Edited');
+      return {ok:true,json:async()=>[saved]};
     }
-    return {ok:true,json:async()=>({type:'file',encoding:'base64',sha:'a'.repeat(40),content:Buffer.from(source).toString('base64')})};
+    return {ok:true,json:async()=>[{path:'src/content/blog/test.md',source,version:'version-one'}]};
   };
-  try {
-    const body={path:'src/content/blog/test.md',sha:'a'.repeat(40),body:'Edited',meta:{title:'New',draft:false,tags:[],category:[]}};
-    const result=await request('POST','save',body,headers);assert.equal(result.statusCode,200);assert.equal(result.body.commit,'c'.repeat(40));
+  try{
+    const body={path:'src/content/blog/test.md',sha:'version-one',body:'Edited',meta:{title:'New',draft:false,tags:[],category:[]}};
+    const result=await request('POST','save',body,headers);assert.equal(result.statusCode,200);assert.equal(result.body.published,true);
     const stale=await request('POST','save',{...body,sha:'old'},headers);assert.equal(stale.statusCode,409);assert.equal(writes,1);
-    const deletion=await request('POST','delete',{path:'src/pages/about.mdx',sha:'a'.repeat(40)},headers);assert.equal(deletion.statusCode,400);
-  } finally {globalThis.fetch=originalFetch;delete process.env.BLOG_GITHUB_TOKEN;}
+    const deletion=await request('POST','delete',{path:'src/pages/about.mdx',sha:'version-one'},headers);assert.equal(deletion.statusCode,400);
+  }finally{globalThis.fetch=originalFetch;delete process.env.BLOG_DATABASE_SECRET;}
 });

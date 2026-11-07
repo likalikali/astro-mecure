@@ -1,0 +1,12 @@
+---
+import MarkdownLayout from '@/layouts/MarkdownLayout.astro';
+import MemoirEntrances from '@/components/MemoirEntrances.astro';
+import { readDocument } from '../../scripts/content-database.js';
+import { MEMOIR_MARKER } from '../../scripts/content-renderer.js';
+const { path } = Astro.props;
+const doc = await readDocument(path);
+const parts = doc.html.split(MEMOIR_MARKER);
+---
+<MarkdownLayout frontmatter={doc.meta}>
+  {parts.map((html, index) => <><Fragment set:html={html} />{index < parts.length-1 && <MemoirEntrances />}</>)}
+</MarkdownLayout>

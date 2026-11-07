@@ -7,6 +7,7 @@ export const GET: APIRoute = async ({params, site}) => {
     return new Response();
   }
   const format = params.format as 'xml' | 'json';
+  if(!['xml','json'].includes(format)) return new Response('Not found',{status:404});
   return new Response(await generateRssFeed({
     title: config.title,
     description: config.description,
@@ -31,10 +32,3 @@ export const GET: APIRoute = async ({params, site}) => {
   //   })),
   // })
 }
-
-export const getStaticPaths = (() => {
-  return [ 
-    { params: { format: 'xml'} },
-    { params: { format: 'json'} },
-  ]
-}) satisfies GetStaticPaths;

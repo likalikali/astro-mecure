@@ -1,34 +1,42 @@
-# 在线内容后台
+# 在线内容后台：即时发布
 
-入口：`https://blog.anriri.pp.ua/admin/`。管理员登录后可管理文章，以及关于、引用声明、更新日志、故乡/东北亚/江南三个时期页面。
+入口：https://blog.anriri.pp.ua/admin/ 。管理员密码与入口保持不变。
 
-## 使用
+## 日常使用
 
-- 文章：新增、编辑、删除，修改分类和标签，切换公开/草稿。创建时间、首次上传时间和最后修改时间均可独立设置，按北京时间输入。默认保存时自动更新修改时间，取消勾选即可手工指定。
-- 独立页面：修改标题、简介和正文，开关评论与侧边栏。关于页中 `<!-- 三色团子入口 -->` 可移动，保存时自动恢复团子组件。
-- 保存直接提交到 GitHub `main`，随后等待 Vercel 自动发布；后台显示发布状态。通常 1–2 分钟，具体取决于构建队列。失败时 GitHub 中的修改仍在，修正后再保存。
-- 同一内容被其他窗口修改时拒绝覆盖；先复制未保存正文，再重新打开文章。
-- 编辑器支持 Markdown 与图片链接。现有文章未在表单显示的图片、密码保护等元数据保留。此版本不包含图片文件上传、站点布局代码或全局配置编辑。
-- 删除文章后可从 GitHub 提交记录恢复。公开仓库的草稿文件也可被查看。
+- 文章支持新增、修改、删除、分类和标签，以及公开/草稿切换。
+- 创建时间、首次上传时间、最后修改时间独立设置，均按北京时间输入。默认保存时自动更新最后修改时间，取消勾选可以手工填写。
+- 关于、引用声明、更新日志和三个时期的回忆录可编辑；评论和侧边栏可开关。
+- 关于页的 `<!-- 三色团子入口 -->` 标记可移动，保存时保留三个团子。
+- **点击“保存并立即生效”后，数据库写入成功即发布，无需 GitHub 提交或构建。** 已打开的公网页面刷新后显示新内容；草稿不公开。
+- 编辑器使用 Markdown，不执行正文内的 JavaScript/MDX 导入。支持表格、代码块、数学公式、图片链接；图片上传不在本次改造范围内。
+- 同一篇内容若被其他窗口先修改，会阻止覆盖。复制未保存文字后重新打开再编辑。
 
-## 服务器配置
+## 数据和备份
 
-Vercel 项目 `astro-mecure` 的 Production 环境需要三个 **Secret** 变量（不要使用 PUBLIC 前缀）：
+- 内容保存在 Supabase 的独立 `astro-mecure` 项目（`pscwmncvcmvrqnynphpl`）。`blog_documents` 保存当前内容，`blog_document_versions` 自动保存每次修改的完整版本。
+- 删除是软删除，内容及历史版本保留，管理员可通过数据库恢复。历史版本目前不在编辑界面显示。
+- GitHub 保存网站代码。`src/content/blog/` 和 `content-backup/pages/` 是切换时的文件快照，此后网页编辑以数据库为准；不要再通过旧本地 Studio 发布文章。
+- 重复运行 `node --env-file=.env.database.local scripts/migrate-content-database.mjs` 只补缺失记录，不覆盖已有在线修改。
+- 导出备份：`node --env-file=.env.database.local scripts/export-content-database.mjs`，文件写入 Git 忽略的 `_drafts/database-backups/`。备份包含正文、草稿及可能的文章访问设置，应按私密资料保管。
+- Supabase 的可用性决定动态内容是否可读。免费项目可能因长期不活跃被暂停，届时在 Supabase 控制台恢复项目；数据库不可用时本站不会回退展示过时或已删除的文章。
 
-| 名称 | 用途 |
-| --- | --- |
-| `BLOG_ADMIN_PASSWORD_HASH` | 管理员密码的 scrypt 盐和摘要，格式 `salt:hexHash` |
-| `BLOG_SESSION_SECRET` | 至少 32 字符的随机会话签名密钥 |
-| `BLOG_GITHUB_TOKEN` | 仅授权 `likalikali/astro-mecure` 的 fine-grained PAT，Contents 读写权限；MetaData 默认读取 |
+## 部署配置
 
-密码与签名密钥可通过 `node scripts/create-admin-credentials.mjs` 生成。文件保存在 Git 忽略的 `.env.admin.local` 和 `admin-credentials.local.txt` 中。将三项变量配置完成后重新部署，设置才会生效。GitHub token 过期时需要替换。
+Vercel Production 保留 `BLOG_ADMIN_PASSWORD_HASH`、`BLOG_SESSION_SECRET`，新增：
 
-不要把电脑上其他用途的全账户 GitHub 凭据复制进此后台。使用专门为此仓库授权的令牌。
+- `BLOG_DATABASE_URL`：项目 API 地址。
+- `BLOG_DATABASE_SECRET`：仅保存在服务器的 Supabase secret / legacy service_role key。
 
-登录使用 HTTPS、HttpOnly / Secure / SameSite=Strict 的 8 小时会话 Cookie，写操作校验固定站点 Origin，文件路径只允许指定内容区域，保存使用 GitHub 文件版本校验防止覆盖。登录尝试另有每个函数实例的限速（不是分布式限速），应使用生成的高强度密码；若需要额外防护可在部署平台添加登录端点限速规则。API 和后台不缓存、不索引，未配置时拒绝操作。
+不再使用 `BLOG_GITHUB_TOKEN` 发布文章。内容表开启 RLS，撤销 anon/authenticated 的表权限；只有服务器凭据可读写。Supabase 的“RLS enabled, no policy”信息提示在这里是预期行为：这些表没有公开客户端访问。
 
-## 检查
+Astro 改为服务端渲染。首页、正文、归档、分类、标签、搜索、RSS 与 sitemap 每次请求读取当前数据；只在单次请求内合并重复读取，不跨请求缓存。文章地址和页面地址保持不变。
 
-`npm run test:admin` 检查路径边界、会话、密码、三个日期与页面组件保留；`npm run build` 包含这些检查。
+Astro 4 使用兼容的 Vercel 7 适配器；构建后的 `finalize-vercel-runtime.mjs` 将函数运行环境设为已经验证的 Node 22，避免旧适配器默认输出退役的 Node 18。
 
-上线后验证：未登录不能读取内容；登录可列出文章和六个独立页面；修改测试文章并保存，等待发布成功，核对公网内容与三个时间；退出后读取接口被拒绝。
+## 检查与回退
+
+- `npm run build`：安全、时间、数据库冲突、正文渲染与构建检查。
+- `node --env-file=.env.database.local --env-file=.env.admin.local node_modules/astro/astro.js dev --host 127.0.0.1 --port 5190`：本地动态站点。
+- `node scripts/verify-instant-publishing.mjs [站点地址]`：新增临时验证文章，测试草稿、三个时间、发布、更新、删除和各列表实时变化，最后清理验证文章。
+- 回退代码前先导出数据库，避免遗失迁移后新增内容。旧 GitHub 版本只包含切换前快照，不能代替最新数据库备份。

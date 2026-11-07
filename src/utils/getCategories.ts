@@ -1,16 +1,6 @@
 import type { Category } from '@/types';
 import getPosts from './getPosts';
-
-let cache: Category[] | null = null;
-async function getCategories(): Promise<Category[]> {
-    if (cache !== null) {
-        return cache;
-    }
-    const posts = (await getPosts()).filter(post => !post.draft);
-    cache = posts.flatMap(post => post.category).filter((category, index, arr) => {
-        return arr.findIndex(item => item.label === category.label) === index;
-    });
-    return cache;
+export default async function getCategories(): Promise<Category[]> {
+ const posts = await getPosts();
+ return posts.flatMap(post => post.category).filter((entry,index,all) => all.findIndex(other => other.slug === entry.slug) === index);
 }
-
-export default getCategories;

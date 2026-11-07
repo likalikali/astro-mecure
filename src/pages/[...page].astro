@@ -12,45 +12,15 @@ export interface Props {
   page: AstroPage<Omit<Post, 'Content'>>;
 }
 
-export const getStaticPaths = (async ({ paginate }) => {
-  const allPosts = (await getPosts()).filter(post => !post.draft).sort((a, b) => compareDesc(a.date, b.date));
-  // Keep / available even when every inherited article is an unpublished draft.
-  if (allPosts.length === 0) {
-    return [{
-      params: { page: undefined },
-      props: {
-        page: {
-          data: [],
-          start: 0,
-          end: 0,
-          size: 0,
-          total: 0,
-          currentPage: 1,
-          lastPage: 1,
-          url: {
-            current: '/',
-            first: undefined,
-            last: undefined,
-            next: undefined,
-            prev: undefined,
-          },
-        } as AstroPage<Omit<Post, 'Content'>>,
-      },
-    }];
-  }
-
-  return paginate(allPosts, {
-    pageSize: config.pagination === false ? Infinity : config.pagination?.pageSize,
-  }).map(item => ({
-    params: {
-      // page is undefined for the first page when using rest parameter in filename
-      page: item.params.page ? `page/${item.params.page}` : undefined
-    },
-    props: item.props,
-  }));
-}) satisfies GetStaticPaths;
-
-const { page }= Astro.props;
+const pageParam = Astro.params.page;
+if(pageParam && !/^page\/[1-9]\d*$/.test(pageParam)) return new Response('页面不存在',{status:404});
+const current = pageParam ? Number(pageParam.split('/')[1]) : 1;
+const allPosts = (await getPosts()).sort((a,b) => compareDesc(a.date,b.date));
+const pageSize = config.pagination === false ? Math.max(1,allPosts.length) : config.pagination?.pageSize || 10;
+const lastPage = Math.max(1,Math.ceil(allPosts.length/pageSize));
+if(current > lastPage) return new Response('页面不存在',{status:404});
+const data = allPosts.slice((current-1)*pageSize,current*pageSize);
+const page = { data, total: allPosts.length, currentPage: current, lastPage, size: data.length } as AstroPage<Omit<Post,'Content'>>;
 
 const pageConfig: Page = {
   type: 'index',

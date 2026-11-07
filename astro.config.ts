@@ -3,13 +3,13 @@ import react from '@astrojs/react';
 import tailwind from '@astrojs/tailwind';
 import mdx from '@astrojs/mdx';
 import icon from 'astro-icon';
-import sitemap from '@astrojs/sitemap';
 // import compress from 'astro-compress';
 
 import svgr from 'vite-plugin-svgr';
 import icons from 'unplugin-icons/vite';
 // import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'astro/config';
+import vercel from '@astrojs/vercel/serverless';
 
 import remarkToc from 'remark-toc';
 import remarkMath from 'remark-math';
@@ -31,7 +31,8 @@ import rehypePostRaw from './plugins/rehype/rehype-post-raw';
 const config: AstroUserConfig = {
   site: 'https://blog.anriri.pp.ua/',
   // base: 'blog',
-  output: 'static',
+  output: 'server',
+  adapter: vercel({ imageService: true }),
   integrations: [
     react(),
     tailwind(),
@@ -63,7 +64,7 @@ const config: AstroUserConfig = {
     //   // },
     //   html: false
     // }),
-    sitemap(),
+
   ],
 
   markdown: {

@@ -1,5 +1,5 @@
 const $ = id => document.getElementById(id);
-let entries = [], current = null, unsaved = false, busy = false, poll = null;
+let entries = [], current = null, unsaved = false, busy = false;
 const notice = text => { $('notice').textContent = text; };
 async function api(op, data, query = {}) {
   const params = new URLSearchParams({ op, ...query });
@@ -49,19 +49,8 @@ async function open(path) {
   busy = true; notice('正在打开……');
   try { display(await api('read', undefined, { path })); notice(''); } catch(e) { notice(e.message); } finally { busy = false; }
 }
-async function watch(commit) {
-  clearTimeout(poll); const start = Date.now();
-  $('deploy').textContent = '内容已保存，正在等待网站自动发布……';
-  async function check() {
-    try {
-      const result = await api('status', undefined, { sha: commit });
-      if (result.state === 'success') { $('deploy').textContent = '✓ 网站已更新。现在可以打开博客查看。'; return; }
-      if (['failure', 'error'].includes(result.state)) { $('deploy').textContent = '网站发布失败，内容仍已保存在 GitHub。请检查本次修改，修正后再次保存。'; return; }
-      if (Date.now() - start > 300_000) { $('deploy').textContent = '内容已保存，网站尚未确认更新。稍后打开博客检查，或查看部署记录。'; return; }
-      poll = setTimeout(check, 8000);
-    } catch(e) { $('deploy').textContent = '内容已保存，但无法查询发布状态：' + e.message; }
-  }
-  poll = setTimeout(check, 5000);
+function showPublished(isPublished = true) {
+  $('deploy').textContent = isPublished ? '✓ 已发布，公网立即生效。打开或刷新博客即可看到。' : '✓ 草稿已保存，不在公网展示。';
 }
 $('loginForm').onsubmit = async e => {
   e.preventDefault(); const button = e.submitter; button.disabled = true;
@@ -88,13 +77,13 @@ $('editForm').onsubmit = async e => {
   try {
     const doc = await api('save', { path: current.path, sha: current.sha, meta, body: $('body').value });
     entries = entries.filter(x=>x.path !== doc.path); entries.push({ path: doc.path, kind: doc.kind, title: doc.meta.title, draft: doc.meta.draft });
-    display(doc); notice('已保存。'); watch(doc.commit);
+    display(doc); notice('已保存。'); showPublished(doc.published);
   } catch(e) { notice(e.message); } finally { busy=false; fields.forEach((f,i)=>f.disabled=disabled[i]); $('save').disabled=false; $('body').readOnly=false; $('updateDate').disabled=$('autoModified').checked; }
 };
 $('delete').onclick = async () => {
   if(busy || !current || !confirm(`确定删除“${current.meta.title}”吗？网站将自动更新。`)) return;
   busy=true; $('delete').disabled=true;
-  try { const result=await api('delete',{path:current.path,sha:current.sha}); entries=entries.filter(x=>x.path!==current.path); current=null; dirty(false); $('editForm').hidden=true; $('empty').hidden=false; renderList(); notice('文章已删除。'); watch(result.commit); }
+  try { const result=await api('delete',{path:current.path,sha:current.sha}); entries=entries.filter(x=>x.path!==current.path); current=null; dirty(false); $('editForm').hidden=true; $('empty').hidden=false; renderList(); notice('文章已删除。'); showPublished(); }
   catch(e){notice(e.message);} finally{busy=false;$('delete').disabled=false;}
 };
 window.addEventListener('beforeunload',e=>{if(unsaved || busy){e.preventDefault();e.returnValue='';}});
