@@ -37,3 +37,13 @@
     }
   }
 }
+/* Keep article photos readable without letting portraits fill several screens. */
+.article-body img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: min(100%, 720px);
+  max-height: min(65vh, 560px);
+  object-fit: contain;
+  margin-inline: auto;
+}
