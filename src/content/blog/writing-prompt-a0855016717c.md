@@ -1,9 +1,9 @@
 ---
 title: "写作占位｜2025剧院repo合集搬运"
-createdDate: 2026-11-07T00:28:20+08:00
-updateDate: 2026-11-07T00:34:49+08:00
-date: 2026-11-07T00:34:49+08:00
-draft: false
+createdDate: 2025-12-21T00:00:00+08:00
+updateDate: 2025-12-21T00:00:00+08:00
+date: 2025-12-21T00:00:00+08:00
+draft: true
 author: default
 category: ["生活", "音乐与舞台"]
 tags: ["写作提示", "待填写"]

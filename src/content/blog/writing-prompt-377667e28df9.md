@@ -1,9 +1,9 @@
 ---
 title: "写作占位｜AI for Quant 前沿研究整理（Agentic Quant / 金融基础模型 / 市场世界模型 / RL / 因果 Alpha / 微观结构）"
-createdDate: 2026-11-07T00:28:20+08:00
-updateDate: 2026-11-07T00:34:49+08:00
-date: 2026-11-07T00:34:49+08:00
-draft: false
+createdDate: 2026-11-02T00:00:00+08:00
+updateDate: 2026-11-02T00:00:00+08:00
+date: 2026-11-02T00:00:00+08:00
+draft: true
 author: default
 category: ["学习", "人工智能"]
 tags: ["写作提示", "待填写"]

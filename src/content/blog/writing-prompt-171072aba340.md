@@ -1,9 +1,9 @@
 ---
 title: "写作占位｜2025.10.13~10.16 捷杰耶夫与马林斯基马勒交响曲repo"
-createdDate: 2026-11-07T00:28:20+08:00
-updateDate: 2026-11-07T00:34:49+08:00
-date: 2026-11-07T00:34:49+08:00
-draft: false
+createdDate: 2025-10-17T00:00:00+08:00
+updateDate: 2025-10-17T00:00:00+08:00
+date: 2025-10-17T00:00:00+08:00
+draft: true
 author: default
 category: ["生活", "音乐与舞台"]
 tags: ["写作提示", "待填写"]

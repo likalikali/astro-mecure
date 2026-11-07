@@ -16,7 +16,7 @@
     "studio": "node scripts/cms-server.js",
     "test:security": "node --test scripts/tests/cms-image-validation.test.mjs",
     "test:dates": "node --test scripts/tests/post-dates.test.mjs",
-    "test:admin": "node --test scripts/tests/cloud-admin.test.mjs scripts/tests/content-renderer.test.mjs scripts/tests/editor-state.test.mjs scripts/tests/publication-lifecycle.test.mjs"
+    "test:admin": "node --test scripts/tests/cloud-admin.test.mjs scripts/tests/content-renderer.test.mjs scripts/tests/editor-state.test.mjs scripts/tests/publication-lifecycle.test.mjs scripts/tests/markdown-edit.test.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.3.4",

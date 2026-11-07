@@ -1,9 +1,9 @@
 ---
 title: "写作占位｜斯坦福SGSI课程-Ethics for Academic"
-createdDate: 2026-11-07T00:28:20+08:00
-updateDate: 2026-11-07T00:34:49+08:00
-date: 2026-11-07T00:34:49+08:00
-draft: false
+createdDate: 2026-09-11T00:00:00+08:00
+updateDate: 2026-09-11T00:00:00+08:00
+date: 2026-09-11T00:00:00+08:00
+draft: true
 author: default
 category: ["学习", "课程研习"]
 tags: ["写作提示", "待填写"]

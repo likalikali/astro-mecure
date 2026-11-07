@@ -1,5 +1,7 @@
 import { editorState } from './editor-state.js';
+import { installMarkdownEditing } from './markdown-edit.js';
 const $=id=>document.getElementById(id);
+installMarkdownEditing($('body'),$('formatToolbar'));
 let entries=[],current=null,baseline='',unsaved=false,busy='',expired=false;
 const notice=text=>{$('notice').textContent=text;};
 function feedback(text='',tone='info'){$('feedback').textContent=text;$('feedback').dataset.tone=tone;$('feedback').hidden=!text;}

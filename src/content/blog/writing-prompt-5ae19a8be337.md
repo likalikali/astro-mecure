@@ -1,9 +1,9 @@
 ---
 title: "写作占位｜中国古典文献学"
-createdDate: 2026-11-07T00:28:20+08:00
-updateDate: 2026-11-07T00:34:49+08:00
-date: 2026-11-07T00:34:49+08:00
-draft: false
+createdDate: 2026-07-10T00:00:00+08:00
+updateDate: 2026-07-10T00:00:00+08:00
+date: 2026-07-10T00:00:00+08:00
+draft: true
 author: default
 category: ["学习", "知识探索"]
 tags: ["写作提示", "待填写"]

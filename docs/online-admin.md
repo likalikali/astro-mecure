@@ -41,3 +41,7 @@ Astro 4 使用兼容的 Vercel 7 适配器；构建后的 `finalize-vercel-runti
 - `node --env-file=.env.database.local --env-file=.env.admin.local node_modules/astro/astro.js dev --host 127.0.0.1 --port 5190`：本地动态站点。
 - `node scripts/verify-instant-publishing.mjs [站点地址]`：新增临时验证文章，测试草稿、三个时间、发布、更新、删除和各列表实时变化，最后清理验证文章。
 - 回退代码前先导出数据库，避免遗失迁移后新增内容。旧 GitHub 版本只包含切换前快照，不能代替最新数据库备份。
+
+## 写作快捷键
+
+正文编辑框支持 Ctrl/⌘+B 加粗、Ctrl/⌘+I 斜体、Ctrl/⌘+K 链接、Ctrl/⌘+反引号 行内代码、Ctrl/⌘+Shift+X 删除线。选中文本后使用，或在空光标处插入标记后输入；重复使用同一种格式可取消。正文上方也有对应按钮。Ctrl/⌘+Z 撤销，Ctrl/⌘+S 暂存。编辑框显示 Markdown 标记，公开文章渲染为对应格式。

@@ -1,9 +1,9 @@
 ---
 title: "写作占位｜民航飞机辨认自查指南"
-createdDate: 2026-11-07T00:28:20+08:00
-updateDate: 2026-11-07T00:34:49+08:00
-date: 2026-11-07T00:34:49+08:00
-draft: false
+createdDate: 2024-08-30T00:00:00+08:00
+updateDate: 2024-08-30T00:00:00+08:00
+date: 2024-08-30T00:00:00+08:00
+draft: true
 author: default
 category: ["学习", "知识探索"]
 tags: ["写作提示", "待填写"]
