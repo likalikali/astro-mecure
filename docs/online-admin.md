@@ -45,3 +45,4 @@ Astro 4 使用兼容的 Vercel 7 适配器；构建后的 `finalize-vercel-runti
 ## 写作快捷键
 
 正文编辑框支持 Ctrl/⌘+B 加粗、Ctrl/⌘+I 斜体、Ctrl/⌘+K 链接、Ctrl/⌘+反引号 行内代码、Ctrl/⌘+Shift+X 删除线。选中文本后使用，或在空光标处插入标记后输入；重复使用同一种格式可取消。正文上方也有对应按钮。Ctrl/⌘+Z 撤销，Ctrl/⌘+S 暂存。编辑框显示 Markdown 标记，公开文章渲染为对应格式。
+友情链接：在后台搜索“友情链接”，按 Markdown 链接格式修改友人帐，暂存修改或发布更新。公开地址为 /friends/。

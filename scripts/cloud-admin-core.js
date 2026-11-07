@@ -2,7 +2,7 @@ import { createHmac, timingSafeEqual, scryptSync } from 'node:crypto';
 import matter from 'gray-matter';
 import { resolvePostDates } from './post-dates.js';
 
-export const PAGES = ['about', 'reference', 'changelog', 'memoirs/hometown', 'memoirs/northeast-asia', 'memoirs/jiangnan'].map(p => `src/pages/${p}.mdx`);
+export const PAGES = ['about', 'friends', 'reference', 'changelog', 'memoirs/hometown', 'memoirs/northeast-asia', 'memoirs/jiangnan'].map(p => `src/pages/${p}.mdx`);
 export const COOKIE = '__Host-blog-admin';
 export function allowedPath(path) {
   return typeof path === 'string' && (PAGES.includes(path) || /^src\/content\/blog\/(?!.*(?:\.\.|\\|%))[\p{L}\p{N}_ -]+(?:\/index)?\.mdx?$/u.test(path));
