@@ -35,3 +35,8 @@ test('only the approved non-autoplay NetEase player may embed',async()=>{
  assert.ok(ok.html.includes('<iframe'));assert.ok(ok.html.includes('https://music.163.com/'));assert.ok(!ok.html.includes('onload'));
  for(const src of ['https://evil.example/','javascript:alert(1)','https://music.163.com.evil.example/outchain/player?type=2&id=1&auto=0&height=66'])assert.ok(!(await renderMarkdown(`<iframe src="${src}"></iframe>`)).html.includes('<iframe'));
 });
+
+test('technical code containing import remains publishable without executing it',async()=>{
+ const result=await compileDocument('src/content/blog/import-example.md','---\ntitle: Code\n---\n```python\nimport os\nprint(os.name)\n```');
+ assert.ok(result.html.includes('import os'));assert.ok(result.html.includes('<code'));
+});

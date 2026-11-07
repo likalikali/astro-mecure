@@ -44,7 +44,6 @@ export async function renderMarkdown(body) {
 export async function compileDocument(path, source) {
   const doc = parseDocument(path, source);
   // Database content is Markdown, never executable MDX/JavaScript.
-  if (/^\s*(?:import|export)\s/m.test(doc.body)) throw new Error('在线正文请使用 Markdown，不支持 import/export 代码。');
   const segments = doc.body.split('<!-- 三色团子入口 -->');
   const parts = await Promise.all(segments.map(renderMarkdown));
   const slug = doc.kind === 'post' ? (doc.meta.permalink || path.replace(/^src\/content\/blog\//, '').replace(/\/index\.mdx?$/, '').replace(/\.mdx?$/, '')) : path.replace(/^src\/pages\//, '').replace(/\.mdx?$/, '');
