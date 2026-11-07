@@ -1,8 +1,15 @@
 import { COOKIE, PAGES, allowedPath, checkPassword, session, validSession, parseDocument, updateDocument } from './cloud-admin-core.js';
-import { databaseConfigured, listDocuments, readDocument, saveDocument, deleteDocument } from './content-database.js';
+import { databaseConfigured, listDocuments, readDocument, saveDocument, saveDraftDocument, patchDocument, deleteDocument } from './content-database.js';
 const ORIGIN = 'https://blog.anriri.pp.ua';
 const attempts = new Map();
 function reply(res, status, body) { res.statusCode = status; res.end(JSON.stringify(body)); }
+export function editorDocument(doc) {
+  const parsed=parseDocument(doc.path,doc.working_source || doc.source,doc.version);
+  const liveMeta=doc.meta || parseDocument(doc.path,doc.source).meta;
+  const published=liveMeta.draft!==true;
+  return {...parsed,published,hasDraft:!!doc.working_source,savedAt:doc.saved_at,
+    publicUrl:published ? (parsed.kind==='page' ? '/'+doc.path.replace(/^src\/pages\//,'').replace(/\.mdx$/,'')+'/' : '/posts/'+(doc.slug || doc.path.replace(/^src\/content\/blog\//,'').replace(/\.mdx?$/,''))+'/') : null};
+}
 export default async function handler(req, res) {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.setHeader('Cache-Control', 'no-store');
@@ -41,27 +48,48 @@ export default async function handler(req, res) {
     if (op === 'session' && req.method === 'GET') return reply(res, 200, { ok: true });
     if (op === 'list' && req.method === 'GET') {
       const docs = await listDocuments();
-      return reply(res, 200, { entries: docs.map(doc => ({ path:doc.path, title:doc.meta.title, draft:doc.meta.draft===true, kind:doc.kind })) });
+      return reply(res, 200, { entries: docs.map(doc => {const e=editorDocument(doc);return {path:e.path,title:e.meta.title,kind:e.kind,draft:!e.published,published:e.published,hasDraft:e.hasDraft,savedAt:e.savedAt};}) });
     }
     const path = req.method === 'GET' ? url.searchParams.get('path') : input.path;
     if (!allowedPath(path)) return reply(res, 400, { error: '不允许访问这个文件' });
     if (op === 'read' && req.method === 'GET') {
       const doc = await readDocument(path);
-      return reply(res,200,parseDocument(path,doc.source,doc.version));
+      return reply(res,200,editorDocument(doc));
     }
     if (op === 'save' && req.method === 'POST') {
       let previous;
       try { previous=await readDocument(path); } catch(error) { if(error.status!==404 || input.sha) throw error; }
       if(PAGES.includes(path) && !previous) return reply(res,400,{error:'不能新建此页面'});
       if((previous?.version || '') !== (input.sha || '')) return reply(res,409,{error:'内容已更新，请先复制未保存正文，再重新载入。'});
-      const source=updateDocument(path,input,previous?.source);
-      const saved=await saveDocument(path,source,previous?.version);
-      return reply(res,200,{...parseDocument(path,saved.source,saved.version),published:!saved.meta.draft});
+      const intent=input.intent || (input.meta?.draft ? 'draft' : 'publish');
+      if(!['draft','publish'].includes(intent))return reply(res,400,{error:'请选择暂存或发布操作'});
+      if(intent==='publish' && (!input.meta?.title?.trim() || !input.body?.trim()))return reply(res,400,{error:'发布前请填写标题和正文。内容还没写完可以先暂存。'});
+      const meta={...input.meta,title:input.meta?.title?.trim() || '未命名文章',draft:intent==='draft'};
+      let source;
+      try {source=updateDocument(path,{...input,meta},previous?.working_source || previous?.source,{publishing:intent==='publish'});}
+      catch(error){return reply(res,400,{error:error.message});}
+      const saved=intent==='draft' ? await saveDraftDocument(path,source,previous) : await saveDocument(path,source,previous?.version);
+      return reply(res,200,{...editorDocument(saved),action:intent});
+    }
+    if(['withdraw','discard-draft'].includes(op) && req.method==='POST') {
+      const previous=await readDocument(path);
+      if(previous.version!==input.sha)return reply(res,409,{error:'内容已更新，请重新载入后再操作。'});
+      if(op==='discard-draft') {
+        if(!previous.working_source)return reply(res,400,{error:'没有可放弃的暂存修改'});
+        return reply(res,200,{...editorDocument(await patchDocument(path,input.sha,{working_source:null})),action:op});
+      }
+      if(PAGES.includes(path))return reply(res,400,{error:'独立页面不能撤回，可暂存修改或发布更新。'});
+      const doc=editorDocument(previous);
+      if(!doc.published)return reply(res,400,{error:'文章尚未发布，无需撤回。'});
+      const source=updateDocument(path,{...doc,meta:{...doc.meta,draft:true}},previous.working_source || previous.source,{publishing:false});
+      const parsed=parseDocument(path,source);
+      const saved=await patchDocument(path,input.sha,{source,meta:parsed.meta,html:'',headings:[],excerpt:'',word_count:0,working_source:null});
+      return reply(res,200,{...editorDocument(saved),action:op});
     }
     if (op === 'delete' && req.method === 'POST') {
       if(PAGES.includes(path)) return reply(res,400,{error:'固定页面可编辑，不可删除。'});
       await deleteDocument(path,input.sha);
-      return reply(res,200,{ok:true,published:true});
+      return reply(res,200,{ok:true,action:'delete'});
     }
     return reply(res, 404, { error: '操作不存在' });
   } catch (error) {

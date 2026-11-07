@@ -33,7 +33,7 @@ export function parseDocument(path, source, sha) {
   }
   return { path, sha, meta: data, body: body.trim(), kind: PAGES.includes(path) ? 'page' : 'post' };
 }
-export function updateDocument(path, input, previous) {
+export function updateDocument(path, input, previous, { publishing = true } = {}) {
   if (!allowedPath(path)) throw new Error('不允许修改这个文件');
   if (typeof input.body !== 'string' || Buffer.byteLength(input.body) > 500_000) throw new Error('正文过长或格式不正确');
   if (!input.meta || typeof input.meta.title !== 'string' || !input.meta.title.trim() || input.meta.title.length > 250) throw new Error('请填写有效标题');
@@ -45,7 +45,7 @@ export function updateDocument(path, input, previous) {
     meta.description = String(input.meta.description ?? old.description ?? '').slice(0, 1000);
     for (const key of ['comment', 'sidebar']) if (typeof input.meta[key] === 'boolean') meta[key] = input.meta[key];
     if (path === 'src/pages/about.mdx') {
-      if (!body.includes('<!-- 三色团子入口 -->')) throw new Error('请保留“三色团子入口”标记，可以把它移到其他位置');
+      if (publishing && !body.includes('<!-- 三色团子入口 -->')) throw new Error('请保留“三色团子入口”标记，可以把它移到其他位置');
       body = "import MemoirEntrances from '@/components/MemoirEntrances.astro';\n\n" + body.replace('<!-- 三色团子入口 -->', '<MemoirEntrances />');
     }
   } else {

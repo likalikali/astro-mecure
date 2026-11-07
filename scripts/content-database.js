@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { compileDocument } from './content-renderer.js';
+import { parseDocument } from './cloud-admin-core.js';
 export const contentScope = new AsyncLocalStorage();
 export function databaseConfigured() { return !!process.env.BLOG_DATABASE_URL && !!process.env.BLOG_DATABASE_SECRET; }
 export async function databaseRequest(query, options = {}) {
@@ -38,12 +39,28 @@ export async function readDocument(path) {
 }
 export async function saveDocument(path, source, expectedVersion) {
   const compiled = await compileDocument(path,source);
-  const record = {...compiled,version:randomUUID(),saved_at:new Date().toISOString(),deleted:false};
+  const record = {...compiled,working_source:null,version:randomUUID(),saved_at:new Date().toISOString(),deleted:false};
   const result = await databaseRequest(expectedVersion ? '?'+new URLSearchParams({path:'eq.'+path,version:'eq.'+expectedVersion,deleted:'eq.false'}) : '', {
     method: expectedVersion ? 'PATCH' : 'POST', body: JSON.stringify(record)
   });
   if(result.length!==1){const e=new Error('内容已被其他窗口修改，请先复制正文，再重新载入。');e.status=409;throw e;}
   return result[0];
+}
+export async function patchDocument(path, expectedVersion, changes) {
+  const result=await databaseRequest('?'+new URLSearchParams({path:'eq.'+path,version:'eq.'+expectedVersion,deleted:'eq.false'}),{
+    method:'PATCH',body:JSON.stringify({...changes,version:randomUUID(),saved_at:new Date().toISOString()})
+  });
+  if(result.length!==1){const e=new Error('内容已被其他窗口修改，请先保留正文，再重新载入。');e.status=409;throw e;}
+  return result[0];
+}
+export async function saveDraftDocument(path, source, previous) {
+  const oldMeta=previous && (previous.meta || parseDocument(path,previous.source).meta);
+  if(previous && oldMeta.draft!==true) return patchDocument(path,previous.version,{working_source:source});
+  const doc=parseDocument(path,source);
+  const record={path,kind:doc.kind,slug:doc.meta.permalink || path.replace(/^src\/content\/blog\//,'').replace(/\/index\.mdx?$/,'').replace(/\.mdx?$/,''),source,meta:doc.meta,html:'',headings:[],excerpt:'',word_count:0,working_source:null};
+  if(previous)return patchDocument(path,previous.version,record);
+  const [saved]=await databaseRequest('',{method:'POST',body:JSON.stringify({...record,version:randomUUID(),saved_at:new Date().toISOString()})});
+  return saved;
 }
 export async function deleteDocument(path, expectedVersion) {
   if(!expectedVersion){const e=new Error('缺少内容版本，请重新载入');e.status=400;throw e;}

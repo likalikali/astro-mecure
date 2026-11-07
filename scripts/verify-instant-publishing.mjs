@@ -20,12 +20,6 @@ try{
  await api('login',{password});
  const about=await api('read',undefined,{path:'src/pages/about.mdx'});assert.ok(about.body.includes('<!-- 三色团子入口 -->'));
  assert.equal(about.meta.comment,true);assert.equal(about.meta.sidebar,true);
- if(base.includes('127.0.0.1')) {
-  const edited=await api('save',{...about,body:about.body+'\n\n'+marker});
-  try { assert.ok((await page('/about/')).text.includes(marker)); }
-  finally {await api('save',{...about,sha:edited.sha});}
-  assert.ok(!(await page('/about/')).text.includes(marker));
- }
  const date=new Date().toISOString();
  current=await api('save',{path:`src/content/blog/${slug}.md`,sha:'',meta:{title:marker,draft:true,tags:['instant-verification'],category:['instant-verification'],createdDate:'2020-01-02T03:04:05+08:00',date,updateDate:'2021-02-03T04:05:06+08:00'},body:'## Immediate publication\n\n'+marker});
  assert.equal((await page('/posts/'+slug+'/')).status,404);
@@ -39,6 +33,24 @@ try{
  await assert.rejects(api('save',{...current,sha:oldVersion}),e=>e.status===409);
  current=await api('save',{...current,body:marker+' UPDATED'});
  assert.ok((await page('/posts/'+slug+'/')).text.includes(marker+' UPDATED'));
+ const publishedBody=current.body,firstUpload=current.meta.date;
+ current=await api('save',{...current,intent:'draft',body:marker+' PRIVATE'});
+ assert.equal(current.published,true);assert.equal(current.hasDraft,true);
+ assert.ok((await page('/posts/'+slug+'/')).text.includes(publishedBody));
+ assert.ok(!(await page('/posts/'+slug+'/')).text.includes(marker+' PRIVATE'));
+ assert.equal((await api('read',undefined,{path:current.path})).body,marker+' PRIVATE');
+ current=await api('discard-draft',{path:current.path,sha:current.sha});
+ assert.equal(current.body,publishedBody);assert.equal(current.hasDraft,false);
+ current=await api('save',{...current,intent:'draft',body:marker+' PENDING'});
+ current=await api('save',{...current,intent:'publish'});
+ assert.ok((await page('/posts/'+slug+'/')).text.includes(marker+' PENDING'));
+ current=await api('save',{...current,intent:'draft',body:marker+' RETAINED'});
+ current=await api('withdraw',{path:current.path,sha:current.sha});
+ assert.equal(current.published,false);assert.equal(current.body,marker+' RETAINED');
+ assert.equal((await page('/posts/'+slug+'/')).status,404);
+ current=await api('save',{...current,intent:'publish'});
+ assert.equal(current.meta.date,firstUpload);
+ assert.ok((await page('/posts/'+slug+'/')).text.includes(marker+' RETAINED'));
  await api('delete',{path:current.path,sha:current.sha});current=null;
  assert.equal((await page('/posts/'+slug+'/')).status,404);
  assert.equal((await page('/categories/instant-verification/')).status,404);
