@@ -29,3 +29,9 @@ test('a racing write is rejected by the database compare-and-swap',async()=>{
  try {await assert.rejects(saveDocument('src/content/blog/test.md','---\ntitle: Test\n---\nText','stale'),e=>e.status===409);}
  finally{globalThis.fetch=original;delete process.env.BLOG_DATABASE_SECRET;}
 });
+
+test('only the approved non-autoplay NetEase player may embed',async()=>{
+ const ok=await renderMarkdown('<iframe src="//music.163.com/outchain/player?type=2&id=3366825024&auto=0&height=66" onload="evil()"></iframe>');
+ assert.ok(ok.html.includes('<iframe'));assert.ok(ok.html.includes('https://music.163.com/'));assert.ok(!ok.html.includes('onload'));
+ for(const src of ['https://evil.example/','javascript:alert(1)','https://music.163.com.evil.example/outchain/player?type=2&id=1&auto=0&height=66'])assert.ok(!(await renderMarkdown(`<iframe src="${src}"></iframe>`)).html.includes('<iframe'));
+});

@@ -17,7 +17,15 @@ export async function renderMarkdown(body) {
   const headings = []; let text = '';
   const processor = unified().use(remarkParse).use(remarkGfm).use(remarkMath)
     .use(remarkRehype, { allowDangerousHtml: true }).use(rehypeRaw)
-    .use(rehypeSanitize, { ...defaultSchema, attributes: { ...defaultSchema.attributes, code: [...(defaultSchema.attributes.code || []), ['className', /^language-./, 'math-inline', 'math-display']] } })
+    .use(() => tree => { visit(tree, 'element', node => {
+      if(node.tagName!=='iframe')return;
+      const src=String(node.properties.src || '').replace(/^\/\//,'https://');
+      if(!/^https:\/\/music\.163\.com\/outchain\/player\?type=2&id=\d+&auto=0&height=66$/.test(src)){
+        node.tagName='span';node.properties={};node.children=[];return;
+      }
+      node.properties={src,width:330,height:86,frameBorder:'0',title:'网易云音乐播放器',loading:'lazy'};
+    }); })
+    .use(rehypeSanitize, { ...defaultSchema, tagNames:[...defaultSchema.tagNames,'iframe'], attributes: { ...defaultSchema.attributes, iframe:['src','width','height','frameBorder','title','loading'], code: [...(defaultSchema.attributes.code || []), ['className', /^language-./, 'math-inline', 'math-display']] } })
     .use(() => tree => {
       const slugger = new GithubSlugger();
       text = toText(tree);
