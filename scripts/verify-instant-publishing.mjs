@@ -14,7 +14,7 @@ async function api(op,input,query={}){
  if(!response.ok){const error=new Error(op+': '+response.status+' '+result.error);error.status=response.status;throw error;}
  return result;
 }
-async function page(path){const r=await fetch(base+path,{cache:'no-store',signal:AbortSignal.timeout(60000)});return {status:r.status,text:await r.text(),cache:r.headers.get('cache-control')};}
+async function page(path){const r=await fetch(base+path,{cache:'no-store',signal:AbortSignal.timeout(60000)});const text=await r.text();assert.ok(!text.includes('Internal server error'),'Incomplete streamed response: '+path);return {status:r.status,text,cache:r.headers.get('cache-control')};}
 try{
  assert.equal((await page('/api/admin?op=list')).status,401);
  await api('login',{password});

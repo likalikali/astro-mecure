@@ -6,9 +6,6 @@ import { imageToHashBase64 } from './converter';
 import { twMerge } from 'tailwind-merge';
 import type { RemoteImageProps as AstroRemoteImageProps, LocalImageProps as AstroLocalImageProps } from 'astro:assets';
 import type { HTMLAttributes } from 'astro/types';
-import { fileURLToPath } from 'node:url';
-// hack method to get the assetsDir, this member is not exported by astro:assets but is used internally
-import { assetsDir } from 'astro:assets';
 
 type ExtraProps = {
   src: string | ImageMetadata | Promise<{default: ImageMetadata}>;
@@ -41,11 +38,11 @@ if (image.srcSet.values.length > 0) {
 }
 
 let blurhash: string | undefined = undefined;
-if (image.options.format !== 'svg' && isESMImportedImage(src)) {
+// On Vercel, static assets live on the CDN, not on the function's filesystem.
+// The normal image fallback preserves the layout without a runtime disk read.
+if (DEV && image.options.format !== 'svg' && isESMImportedImage(src)) {
   const resolvedSrc = 'then' in src ? (await src).default : src;
-  const filePath = DEV
-		? new RegExp(`^${FS_PREFIX}([^?#]*)`).exec(resolvedSrc.src)?.[1] ?? ''
-		: fileURLToPath(new URL('.' + resolvedSrc.src, assetsDir));
+  const filePath = new RegExp(`^${FS_PREFIX}([^?#]*)`).exec(resolvedSrc.src)?.[1] ?? '';
   blurhash = await imageToHashBase64(filePath);
 }
 ---
